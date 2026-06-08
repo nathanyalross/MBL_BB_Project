@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 from pathlib import Path
-from plot_func import plot_bar_two_datasets 
-from plot_func import plot_line
+from Visualization.plot_func import plot_bar_two_datasets 
+from Visualization.plot_func import plot_line
 
 #Set Paths for analysis
 data_paths = ['']
@@ -192,7 +192,7 @@ export_path = path.strip("'")
 export_dir = Path(export_path)
 export_dir.mkdir(parents=True, exist_ok=True)
 
-groupname = input('Enter qualifier for group, i.e. SST for SST neurons: ')
+groupname = input('Enter qualifier for group, i.e. SST for SST neurons, all for all cells, etc.: ')
 
 export_path = export_dir / f"{groupname}_VC_Frequency_line.pdf"
 freq_plot.savefig(export_path)

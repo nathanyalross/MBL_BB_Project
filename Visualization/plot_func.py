@@ -289,8 +289,8 @@ def plot_cumulative_probability(
     column: str,
     n_bootstrap: int = 1000,
     confidence: float = 0.95,
-    baseline_sweeps: tuple = (1, 5),
-    drug_sweeps: tuple = (7, 11),
+    baseline_sweeps: tuple = (1, 3),
+    drug_sweeps: tuple = (4, 8),
     ax: plt.Axes = None,
     title: str = None,
 ) -> tuple[plt.Figure, plt.Axes, CumulativeProbabilityStats]:
