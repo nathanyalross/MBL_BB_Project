@@ -285,7 +285,7 @@ def _significance_label(p: float) -> str:
 
 
 def plot_cumulative_probability(
-    df: pd.DataFrame,
+    df: pd.DataFrame | list[pd.DataFrame],  # accept either
     column: str,
     n_bootstrap: int = 1000,
     confidence: float = 0.95,
@@ -316,14 +316,22 @@ def plot_cumulative_probability(
     stats           : CumulativeProbabilityStats dataclass with all statistical results
     """
 
-    # ── 1. Slice data by sweep range ──────────────────────────────────────────
-    baseline_data = df[
-        df["Sweep Number"].between(*baseline_sweeps)
-    ][column].dropna().values
+    # ── 1. Normalize input and extract data ────────────────────────────────────────────
+    if isinstance(df, pd.DataFrame):
+        df_list = [df]
+    else:
+        df_list = df
 
-    drug_data = df[
-        df["Sweep Number"].between(*drug_sweeps)
-    ][column].dropna().values
+    # Then aggregate all data across DataFrames before proceeding
+    import numpy as np
+    baseline_data = np.concatenate([
+        d[d["Sweep Number"].between(*baseline_sweeps)][column].dropna().values
+        for d in df_list
+    ])
+    drug_data = np.concatenate([
+        d[d["Sweep Number"].between(*drug_sweeps)][column].dropna().values
+        for d in df_list
+    ])
 
     if len(baseline_data) == 0 or len(drug_data) == 0:
         raise ValueError(

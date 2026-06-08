@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 from pathlib import Path
-from Visualization.plot_func import plot_bar_two_datasets 
-from Visualization.plot_func import plot_line
+from plot_func import plot_bar_two_datasets 
+from plot_func import plot_line
 
 #Set Paths for analysis
 data_paths = ['']
