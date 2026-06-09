@@ -5,6 +5,7 @@ import csv
 import os
 import re
 from pathlib import Path
+import os
 
 def explore_h5(file_path):
     """Print the data organization structure"""
@@ -623,16 +624,13 @@ def save_results_to_csv(file_path, vc_results, vc2_results, output_filename=None
 # MAIN EXECUTION
 # ==============================================================================
 
-#Altered approach to manually enter path
 path = input('Enter file path for analysis: ')
-file_path = path.strip("'")
-path_object= Path(file_path)
+file_path = path.strip().strip('"').strip("'")
+
+path_object = Path(file_path)
 filename = path_object.stem
 
-#Select original path for export
-export_path = path_object.parent
-export_path = str(export_path) + '/Exports'
-export_dir = Path(export_path)
+export_dir = path_object.parent / "Exports"
 export_dir.mkdir(parents=True, exist_ok=True)
 
 # Explore file structure
