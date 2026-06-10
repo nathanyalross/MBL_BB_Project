@@ -396,7 +396,7 @@ def plot_VC(file_path):
         # Search for VC_Continuous dataset in Data group
         dataset_name = None
         for key in f['Data'].keys():
-            if re.match(r'R\d+_S\d+_VC_Continuous', key):
+            if re.match(r'R\d+_S\d+_VC_cont', key):
                 dataset_name = f'Data/{key}'
                 break
     
@@ -534,7 +534,7 @@ def plot_event_detection(file_path):
         # Search for VC_Continuous dataset in Data group
         dataset_name = None
         for key in f['Data'].keys():
-            if re.match(r'R\d+_S\d+_VC_Continuous', key):
+            if re.match(r'R\d+_S\d+_VC_cont', key):
                 dataset_name = f'Data/{key}'
                 break
 
@@ -759,7 +759,7 @@ def plot_event_overlay(file_path):
         # Search for VC_Continuous dataset in Data group
         dataset_name = None
         for key in f['Data'].keys():
-            if re.match(r'R\d+_S\d+_VC_Continuous', key):
+            if re.match(r'R\d+_S\d+_VC_cont', key):
                 dataset_name = f'Data/{key}'
                 break
 
