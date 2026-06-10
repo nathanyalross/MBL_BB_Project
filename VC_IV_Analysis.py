@@ -71,12 +71,12 @@ def plot_VC(file_path):
             mask_50_51 = (time_ms >= 50) & (time_ms <= 51)
             min_value_50_51 = np.min(current_pA[mask_50_51])
 
-            # 2. Baseline (first 50 ms) vs 140-145 ms difference
+            # 2. Baseline (first 50 ms) vs 90-95 ms difference
             mask_baseline = time_ms <= 50
-            mask_140_145 = (time_ms >= 140) & (time_ms <= 145)
+            mask_90_95 = (time_ms >= 90) & (time_ms <= 95)
             baseline_avg = np.mean(current_pA[mask_baseline])
-            avg_140_145 = np.mean(current_pA[mask_140_145])
-            difference_baseline_140_145 = avg_140_145 - baseline_avg
+            avg_90_95 = np.mean(current_pA[mask_90_95])
+            difference_baseline_90_95 = avg_90_95 - baseline_avg
 
             # 3. AUC calculation using 50-80 ms average level as reference
             # Use horizontal line at 50-80 ms average level
@@ -84,17 +84,17 @@ def plot_VC(file_path):
             time_projection_50_80 = time_ms[mask_50_80]
 
             # Horizontal reference line at 140-145 ms average level
-            projected_line_50_80 = np.full_like(time_projection_50_80, avg_140_145)
+            projected_line_50_80 = np.full_like(time_projection_50_80, avg_90_95)
 
             # Calculate AUC between actual data and 140-145 ms average level (50-80 ms)
             actual_data_projection_50_80 = current_pA[mask_50_80]
 
             # Only calculate AUC for values BELOW the 140-145 ms average level
-            difference_from_140_145 = actual_data_projection_50_80 - projected_line_50_80
-            below_140_145_mask = difference_from_140_145 < 0
-            difference_from_140_145[~below_140_145_mask] = 0  # Set values above 140-145 ms level to 0
+            difference_from_90_95 = actual_data_projection_50_80 - projected_line_50_80
+            below_90_95_mask = difference_from_90_95 < 0
+            difference_from_90_95[~below_90_95_mask] = 0  # Set values above 140-145 ms level to 0
 
-            auc_projection_50_80 = np.trapezoid(difference_from_140_145, time_projection_50_80)
+            auc_projection_50_80 = np.trapezoid(difference_from_90_95, time_projection_50_80)
 
 
             # 4. AUC calculation using baseline (0-50 ms) average level as reference
@@ -120,8 +120,8 @@ def plot_VC(file_path):
                 'sweep_number': sweep_number,
                 'min_value_50_51': min_value_50_51,
                 'baseline_avg': baseline_avg,
-                'avg_140_145': avg_140_145,
-                'difference_baseline_140_145': difference_baseline_140_145,
+                'avg_90_95': avg_90_95,
+                'difference_baseline_90_95': difference_baseline_90_95,
                 'auc_projection_50_80': auc_projection_50_80,
                 'auc_projection_150_250': auc_projection_151_249
             }
@@ -135,9 +135,9 @@ def plot_VC(file_path):
             print(f"{'=' * 50}")
             print(f"1. Minimum value between 50-51 ms: {min_value_50_51:.2f} pA")
             print(f"2. Baseline average (0-50 ms): {baseline_avg:.2f} pA")
-            print(f"   Average 140-145 ms: {avg_140_145:.2f} pA")
-            print(f"   Difference (140-145 ms - baseline): {difference_baseline_140_145:.2f} pA")
-            print(f"3. AUC relative to 140-145 ms level (50-80 ms): {auc_projection_50_80:.2f} pA·ms")
+            print(f"   Average 90-95 ms: {avg_90_95:.2f} pA")
+            print(f"   Difference (90-95 ms - baseline): {difference_baseline_90_95:.2f} pA")
+            print(f"3. AUC relative to 90-95 ms level (50-80 ms): {auc_projection_50_80:.2f} pA·ms")
             print(f"4. AUC relative to baseline level (150-246 ms): {auc_projection_151_249:.2f} pA·ms")
             print(f"{'=' * 50}")
 
@@ -153,12 +153,12 @@ def plot_VC(file_path):
                              label='Min region (50-51 ms)')
             plt.fill_between(time_ms, current_pA, baseline_avg, where=mask_baseline, alpha=0.3, color='blue',
                              label='Baseline (0-50 ms)')
-            plt.fill_between(time_ms, current_pA, avg_140_145, where=mask_140_145, alpha=0.3, color='green',
-                             label='End region (140-145 ms)')
+            plt.fill_between(time_ms, current_pA, avg_90_95, where=mask_90_95, alpha=0.3, color='green',
+                             label='End region (90-95 ms)')
 
             # Add AUC shading relative to 140-145 ms average level (50-80 ms) - ONLY BELOW
-            below_140_145_in_region = (current_pA < avg_140_145) & mask_50_80
-            plt.fill_between(time_ms, current_pA, avg_140_145, where=below_140_145_in_region, alpha=0.3, color='purple',
+            below_90_95_in_region = (current_pA < avg_90_95) & mask_50_80
+            plt.fill_between(time_ms, current_pA, avg_90_95, where=below_90_95_in_region, alpha=0.3, color='purple',
                              label='AUC relative to 140-145 ms level (50-80 ms) - BELOW only')
 
             # Add AUC shading relative to baseline average level (150-250 ms) - ONLY ABOVE baseline
@@ -169,7 +169,7 @@ def plot_VC(file_path):
 
             # Add horizontal reference lines for averages
             plt.axhline(y=baseline_avg, color='blue', linestyle=':', alpha=0.7)
-            plt.axhline(y=avg_140_145, color='green', linestyle=':', alpha=0.7)
+            plt.axhline(y=avg_90_95, color='green', linestyle=':', alpha=0.7)
 
             plt.title(f'VC BEGIN - Sweep {sweep_number}')
             plt.xlabel("Time (ms)")
@@ -191,7 +191,7 @@ def plot_VC(file_path):
         print(f"{'-' * 95}")
 
         for result in all_results:
-            print(f"{result['sweep_number']:<6} {result['min_value_50_51']:<12.2f} {result['baseline_avg']:<12.2f} {result['avg_140_145']:<14.2f} {result['difference_baseline_140_145']:<12.2f} {result['auc_projection_50_80']:<12.2f} {result['auc_projection_150_250']:<14.2f}")
+            print(f"{result['sweep_number']:<6} {result['min_value_50_51']:<12.2f} {result['baseline_avg']:<12.2f} {result['avg_90_95']:<14.2f} {result['difference_baseline_90_95']:<12.2f} {result['auc_projection_50_80']:<12.2f} {result['auc_projection_150_250']:<14.2f}")
 
         print(f"{'=' * 95}")
 
@@ -243,30 +243,30 @@ def plot_VC2(file_path):
             mask_50_51 = (time_ms >= 50) & (time_ms <= 51)
             min_value_50_51 = np.min(current_pA[mask_50_51])
 
-            # 2. Baseline (first 50 ms) vs 140-145 ms difference
+            # 2. Baseline (first 50 ms) vs 90-95 ms difference
             mask_baseline = time_ms <= 50
-            mask_140_145 = (time_ms >= 140) & (time_ms <= 145)
+            mask_90_95 = (time_ms >= 90) & (time_ms <= 95)
             baseline_avg = np.mean(current_pA[mask_baseline])
-            avg_140_145 = np.mean(current_pA[mask_140_145])
-            difference_baseline_140_145 = avg_140_145 - baseline_avg
+            avg_90_95 = np.mean(current_pA[mask_90_95])
+            difference_baseline_90_95 = avg_90_95 - baseline_avg
 
-            # 3. AUC calculation using 140-145 ms average level as reference
-            # Use horizontal line at 140-145 ms average level
+            # 3. AUC calculation using 90-95 ms average level as reference
+            # Use horizontal line at 90-95 ms average level
             mask_50_80 = (time_ms >= 50) & (time_ms <= 80)
             time_projection_50_80 = time_ms[mask_50_80]
 
             # Horizontal reference line at 140-145 ms average level
-            projected_line_50_80 = np.full_like(time_projection_50_80, avg_140_145)
+            projected_line_50_80 = np.full_like(time_projection_50_80, avg_90_95)
 
             # Calculate AUC between actual data and 140-145 ms average level (50-80 ms)
             actual_data_projection_50_80 = current_pA[mask_50_80]
 
             # Only calculate AUC for values BELOW the 140-145 ms average level
-            difference_from_140_145 = actual_data_projection_50_80 - projected_line_50_80
-            below_140_145_mask = difference_from_140_145 < 0
-            difference_from_140_145[~below_140_145_mask] = 0  # Set values above 140-145 ms level to 0
+            difference_from_90_95 = actual_data_projection_50_80 - projected_line_50_80
+            below_90_95_mask = difference_from_90_95 < 0
+            difference_from_90_95[~below_90_95_mask] = 0  # Set values above 140-145 ms level to 0
 
-            auc_projection_50_80 = np.trapezoid(difference_from_140_145, time_projection_50_80)
+            auc_projection_50_80 = np.trapezoid(difference_from_90_95, time_projection_50_80)
 
             # 4. AUC calculation using baseline (0-50 ms) average level as reference
             # Use horizontal line at baseline average level
@@ -291,8 +291,8 @@ def plot_VC2(file_path):
                 'sweep_number': sweep_number,
                 'min_value_50_51': min_value_50_51,
                 'baseline_avg': baseline_avg,
-                'avg_140_145': avg_140_145,
-                'difference_baseline_140_145': difference_baseline_140_145,
+                'avg_90_95': avg_90_95,
+                'difference_baseline_90_95': difference_baseline_90_95,
                 'auc_projection_50_80': auc_projection_50_80,
                 'auc_projection_150_250': auc_projection_151_249
             }
@@ -306,8 +306,8 @@ def plot_VC2(file_path):
             print(f"{'=' * 50}")
             print(f"1. Minimum value between 50-51 ms: {min_value_50_51:.2f} pA")
             print(f"2. Baseline average (0-50 ms): {baseline_avg:.2f} pA")
-            print(f"   Average 140-145 ms: {avg_140_145:.2f} pA")
-            print(f"   Difference (140-145 ms - baseline): {difference_baseline_140_145:.2f} pA")
+            print(f"   Average 90-95 ms: {avg_90_95:.2f} pA")
+            print(f"   Difference (90-95 ms - baseline): {difference_baseline_90_95:.2f} pA")
             print(f"3. AUC relative to 140-145 ms level (50-80 ms): {auc_projection_50_80:.2f} pA·ms")
             print(f"4. AUC relative to baseline level (150-246 ms): {auc_projection_151_249:.2f} pA·ms")
             print(f"{'=' * 50}")
@@ -324,13 +324,13 @@ def plot_VC2(file_path):
                              label='Min region (50-51 ms)')
             plt.fill_between(time_ms, current_pA, baseline_avg, where=mask_baseline, alpha=0.3, color='blue',
                              label='Baseline (0-50 ms)')
-            plt.fill_between(time_ms, current_pA, avg_140_145, where=mask_140_145, alpha=0.3, color='green',
+            plt.fill_between(time_ms, current_pA, avg_90_95, where=mask_90_95, alpha=0.3, color='green',
                              label='End region (140-145 ms)')
 
             # Add AUC shading relative to 140-145 ms average level (50-80 ms) - ONLY BELOW
-            below_140_145_in_region = (current_pA < avg_140_145) & mask_50_80
-            plt.fill_between(time_ms, current_pA, avg_140_145, where=below_140_145_in_region, alpha=0.3, color='purple',
-                             label='AUC relative to 140-145 ms level (50-80 ms) - BELOW only')
+            below_90_95_in_region = (current_pA < avg_90_95) & mask_50_80
+            plt.fill_between(time_ms, current_pA, avg_90_95, where=below_90_95_in_region, alpha=0.3, color='purple',
+                             label='AUC relative to 90-95 ms level (50-80 ms) - BELOW only')
 
             # Add AUC shading relative to baseline average level (150-250 ms) - ONLY ABOVE baseline
             above_baseline_in_region = (current_pA > baseline_avg) & mask_151_249
@@ -340,7 +340,7 @@ def plot_VC2(file_path):
 
             # Add horizontal reference lines for averages
             plt.axhline(y=baseline_avg, color='blue', linestyle=':', alpha=0.7)
-            plt.axhline(y=avg_140_145, color='green', linestyle=':', alpha=0.7)
+            plt.axhline(y=avg_90_95, color='green', linestyle=':', alpha=0.7)
 
             plt.title(f'VC END - Sweep {sweep_number}')
             plt.xlabel("Time (ms)")
@@ -362,7 +362,7 @@ def plot_VC2(file_path):
         print(f"{'-' * 95}")
 
         for result in all_results:
-            print(f"{result['sweep_number']:<6} {result['min_value_50_51']:<12.2f} {result['baseline_avg']:<12.2f} {result['avg_140_145']:<14.2f} {result['difference_baseline_140_145']:<12.2f} {result['auc_projection_50_80']:<12.2f} {result['auc_projection_150_250']:<14.2f}")
+            print(f"{result['sweep_number']:<6} {result['min_value_50_51']:<12.2f} {result['baseline_avg']:<12.2f} {result['avg_90_95']:<14.2f} {result['difference_baseline_90_95']:<12.2f} {result['auc_projection_50_80']:<12.2f} {result['auc_projection_150_250']:<14.2f}")
 
         print(f"{'=' * 95}")
 
@@ -442,8 +442,8 @@ def save_results_to_csv(file_path, vc_results, vc2_results, output_filename=None
                     result['sweep_number'],
                     f"{result['min_value_50_51']:.2f}",
                     f"{result['baseline_avg']:.2f}",
-                    f"{result['avg_140_145']:.2f}",
-                    f"{result['difference_baseline_140_145']:.2f}",
+                    f"{result['avg_90_95']:.2f}",
+                    f"{result['difference_baseline_90_95']:.2f}",
                     f"{result['auc_projection_50_80']:.2f}",
                     f"{result['auc_projection_150_250']:.2f}"
                 ])
@@ -458,8 +458,8 @@ def save_results_to_csv(file_path, vc_results, vc2_results, output_filename=None
                     result['sweep_number'],
                     f"{result['min_value_50_51']:.2f}",
                     f"{result['baseline_avg']:.2f}",
-                    f"{result['avg_140_145']:.2f}",
-                    f"{result['difference_baseline_140_145']:.2f}",
+                    f"{result['avg_90_95']:.2f}",
+                    f"{result['difference_baseline_90_95']:.2f}",
                     f"{result['auc_projection_50_80']:.2f}",
                     f"{result['auc_projection_150_250']:.2f}"
                 ])
@@ -490,7 +490,7 @@ def save_results_to_csv(file_path, vc_results, vc2_results, output_filename=None
 
             if i < len(vc_results):
                 # Access resistance calculation: -20/E_value*1000 for first row, -10/E_value*1000 for second, etc.
-                g_value = vc_results[i]['difference_baseline_140_145']  # This is column G
+                g_value = vc_results[i]['difference_baseline_90_95']  # This is column G
                 if i == 0:
                     cell_resistance = -20 / g_value * 1000
                 elif i == 1:
@@ -559,7 +559,7 @@ def save_results_to_csv(file_path, vc_results, vc2_results, output_filename=None
             # Add new column data before CC section
             if i < len(vc2_results):
                 # Access resistance calculation: -20/E_value*1000 for first row, -10/E_value*1000 for second, etc.
-                g_value = vc2_results[i]['difference_baseline_140_145']  # This is column G
+                g_value = vc2_results[i]['difference_baseline_90_95']  # This is column G
                 if i == 0:
                     cell_resistance = -20 / g_value * 1000
                 elif i == 1:
