@@ -232,9 +232,9 @@ def detect_events(data, time_axis, threshold_factor, min_amplitude,
 def analyze_event(data, time_axis, peak_idx, baseline_value):
     """Analyze event properties using working debug logic without printing."""
 
-    # Determine time units
+    # Determine time units\
     # Find sampling rate - if there is no time axis defaults to 20 kHz
-    dt = time_axis[1] - time_axis[0] if len(time_axis) > 1 else 1 / 10000
+    dt = time_axis[1] - time_axis[0] if len(time_axis) > 1 else 1 / 20000
     # Returns T/F value if your sampling rate is greater than 20 kHz (or 0.00005)
     time_in_ms = dt > 0.001
     # Sampling rate for analysis - if time_in_ms is true then it will default to dividing sampling rate by 1000. otherwise, keep original sampling rate
@@ -428,7 +428,7 @@ def plot_VC(file_path):
         # Calculate time axis for one sweep
         num_samples = data.shape[0]
         # Based on the data shape (14000 samples), assuming 10 kHz sampling rate
-        time_axis = np.arange(num_samples) * (1 / 10000)  # 10 kHz = 1/10000 s per sample
+        time_axis = np.arange(num_samples) * (1 / 20000)  # 10 kHz = 1/10000 s per sample
         sweep_duration_s = time_axis[-1]  # Duration of one sweep in seconds
 
         for i, sweep_number in enumerate(available_sweeps):
@@ -563,7 +563,7 @@ def plot_event_detection(file_path):
 
         # Calculate time axis for one sweep
         num_samples = data.shape[0]
-        sampling_rate = 10000  # 10 kHz
+        sampling_rate = 20000  # 10 kHz
         time_axis = np.arange(num_samples) / sampling_rate
         sweep_duration_s = time_axis[-1]
 
@@ -798,7 +798,7 @@ def plot_event_overlay(file_path):
         all_events = []
 
         num_samples = data.shape[0]
-        sampling_rate = 10000 #10 kHz
+        sampling_rate = 20000 #10 kHz
         time_axis = np.arange(num_samples) / sampling_rate
         sweep_duration_s = time_axis[-1]
 
