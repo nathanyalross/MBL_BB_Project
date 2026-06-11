@@ -1,0 +1,531 @@
+import h5py
+import matplotlib.pyplot as plt
+import numpy as np
+import re
+from pathlib import Path
+import os
+import json
+from datetime import datetime
+from typing import List, Dict, Any
+import csv
+
+#List to store what runs were utilized
+runs= []
+
+def meta_analysis(path: str, input_list, runs: List[str]) -> Dict[str, Any]:
+    """
+    Function to create a meta-analysis json file that includes all input dataframe names and analyses ran
+
+    Will check path to see if a meta analysis has already been done, if a json file is in the path
+    it will append to that file
+
+    Args: 
+        path: path containing processed data
+        input_list: name of input data
+        runs: runs used for analysis
+
+    Returns:
+        meta_json: exports json file to path that includes meta data, overwriting existing one if needed
+    """
+    
+    # Define the meta-analysis file path
+    meta_file_path = os.path.join(path, "meta_analysis.json")
+    
+    # Initialize or load existing meta-analysis data
+    # If the json file already exists:
+    if os.path.exists(meta_file_path):
+        #try opening the existing json file
+        try:
+            with open(meta_file_path, 'r') as f:
+                meta_data = json.load(f)
+            print(f"Loaded existing meta-analysis file from {meta_file_path}")
+        #If opening fails, just report an error and create new json file
+        except (json.JSONDecodeError, IOError) as e:
+            print(f"Error loading existing meta-analysis file: {e}")
+            print("Creating new meta-analysis file...")
+            meta_data = {}
+    #If there is no existing json file then a new file will be created
+    else:
+        meta_data = {}
+        print("Creating new meta-analysis file...")
+    
+    # Initialize structure if it doesn't exist
+    if "meta_analysis" not in meta_data:
+        meta_data["meta_analysis"] = {
+            "created_date": datetime.now().isoformat(),
+            "last_updated": datetime.now().isoformat(),
+            "sessions": []
+        }
+    
+    # Update last_updated timestamp
+    meta_data["meta_analysis"]["last_updated"] = datetime.now().isoformat()
+    
+    # Create current session data
+    current_session = {
+        #Will identify which session this is in order
+        "session_id": len(meta_data["meta_analysis"]["sessions"]) + 1,
+        #Identifies time that the session started
+        "timestamp": datetime.now().isoformat(),
+        #Lists input dataframes
+        "Input Data": input_list,
+        #Lists the analyses that were performed
+        "Runs Used": runs
+    }
+    
+    # Check if this exact session already exists (avoid duplicates)
+    session_exists = False
+    #Iterate through all of the sessions in the metadata
+    for session in meta_data["meta_analysis"]["sessions"]:
+        #If all of the session data matches a past session, then it will update the timestamp for identical session
+        if (session.get("Input Data") == input_list and 
+            session.get("Runs Used") == runs):
+            session_exists = True
+            print("Identical session found. Updating timestamp...")
+            #Update timestamp of identical session (re-analyzed)
+            session["timestamp"] = datetime.now().isoformat()
+            break
+    
+    #If the current session does not exist then add the current session to metadata as new session
+    if not session_exists:
+        meta_data["meta_analysis"]["sessions"].append(current_session)
+        print(f"Added new session with {len(input_list)} datasets and {len(runs)} runs")
+    
+    # Add summary statistics
+    all_datasets = set()
+    all_analyses = set()
+    
+    #Look through all sessions in file and find all input dataframes and sessions used
+    for session in meta_data["meta_analysis"]["sessions"]:
+        all_datasets.update(session.get("Input Data", []))
+    
+    #Create summary data
+    meta_data["meta_analysis"]["summary"] = {
+        "total_unique_datasets": len(all_datasets),
+        "total_sessions": len(meta_data["meta_analysis"]["sessions"]),
+        "all_datasets_used": sorted(list(all_datasets)),
+    }
+    
+    # Ensure directory exists
+    os.makedirs(path, exist_ok=True)
+    
+    # Write the updated meta-analysis file
+    try:
+        with open(meta_file_path, 'w') as f:
+            json.dump(meta_data, f, indent=2, sort_keys=True)
+        print(f"Meta-analysis file saved to: {meta_file_path}")
+    except IOError as e:
+        print(f"Error saving meta-analysis file: {e}")
+        return None
+    
+    return meta_data
+
+def explore_h5(file_path):
+    """Print the data organization structure"""
+    datasets = []
+    with h5py.File(file_path, 'r') as f:
+        def collect_datasets(name, obj):
+            if isinstance(obj, h5py.Dataset):
+                datasets.append(name)
+                print(f"Dataset: {name}")
+                print(f"  Shape: {obj.shape}")
+                print(f"  Dtype: {obj.dtype}")
+
+        print("File Structure and Datasets:")
+        f.visititems(collect_datasets)
+
+    return datasets
+
+def plot_CC(file_path):
+    """Plot specific sweeps from the CC dataset and perform measurements"""
+    # ==============================================================================
+    # MODIFY THESE VALUES FOR YOUR ANALYSIS
+    # ==============================================================================
+    sweep_numbers = [1,2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]  # List of sweeps to analyze
+    # ==============================================================================
+
+    run = input('Specify DDI Stimulation run, number only: ')
+    runs.append(f'CC_DDI:{run}')
+
+    with h5py.File(file_path, 'r') as f:
+        # Search for CC_DDI dataset in Data group
+        dataset_name = None
+        for key in f['Data'].keys():
+            #Adjust this for appropriate filename
+            #if re.match(f'R{run}+_S2+_CC_IV_DDI', key): #For Sutter
+            if re.match(f'R{run}+_S1+_CC_DDI', key): #For HEKA
+                dataset_name = f'Data/{key}'
+                break
+
+    with h5py.File(file_path, 'r') as f:
+        print(dataset_name)
+        data = f[dataset_name][:]
+
+        # Check data shape and available sweeps
+        total_sweeps = data.shape[1]
+        print(f"Total available sweeps in dataset: {total_sweeps}")
+
+        # Filter sweep numbers to only include existing sweeps
+        valid_sweep_numbers = [s for s in sweep_numbers if s <= total_sweeps]
+        invalid_sweep_numbers = [s for s in sweep_numbers if s > total_sweeps]
+
+        if invalid_sweep_numbers:
+            print(f"Warning: The following sweep numbers don't exist and will be skipped: {invalid_sweep_numbers}")
+
+        if not valid_sweep_numbers:
+            print("Error: No valid sweep numbers found!")
+            return []
+
+        # Store results for all sweeps
+        all_results = []
+
+        for sweep_number in valid_sweep_numbers:
+            try:
+                # Convert sweep number to index (1-indexed to 0-indexed)
+                sweep_index = sweep_number - 1
+
+                # Create time axis (assuming same sampling rate: 20 kHz = 50 μs per sample)
+                # Create time axis (assuming same sampling rate: 20 kHz = 50 μs per sample)
+                num_samples = data.shape[0]  # Get actual number of samples from data
+                time_axis = np.arange(num_samples) * 5e-5  # 10e-5 seconds per sample
+                time_s = time_axis  # Time in seconds
+                voltage_mV = data[:, sweep_index] * 1000  # Convert to mV
+                print(voltage_mV)
+
+                # Rest of your existing code for measurements...
+                # [Include all the existing measurement code here]
+
+                # ==============================================================================
+                # MEASUREMENTS
+                # ==============================================================================
+
+                # 1. Average Y value from 0 to 1 s
+                mask_0_1s = (time_s >= 0) & (time_s <= 1)
+                avg_0_1s = np.mean(voltage_mV[mask_0_1s])
+
+                # 2. Average Y value at 2.49 to 2.5 s
+                mask_2_49_2_5s = (time_s >= 2.49) & (time_s <= 2.5)
+                avg_2_49_2_5s = np.mean(voltage_mV[mask_2_49_2_5s])
+
+                # 3. Average Y value at 2.99 to 3 s
+                mask_2_99_3s = (time_s >= 2.99) & (time_s <= 3)
+                avg_2_99_3s = np.mean(voltage_mV[mask_2_99_3s])
+
+                # 4. Average Y value at 3.99 to 4 s
+                mask_3_99_4s = (time_s >= 3.99) & (time_s <= 4)
+                avg_3_99_4s = np.mean(voltage_mV[mask_3_99_4s])
+
+                # 5. Count action potentials (threshold: -30 mV)
+                threshold = -30  # mV
+
+                # Find peaks that cross the threshold
+                above_threshold = voltage_mV > threshold
+
+                # Find transitions from below to above threshold
+                crossings = np.diff(above_threshold.astype(int))
+                rising_edges = np.where(crossings == 1)[0]
+
+                # Count action potentials
+                action_potential_count = len(rising_edges)
+
+                # Get the times of action potentials for annotation
+                ap_times = time_s[rising_edges] if len(rising_edges) > 0 else []
+
+                # 6. AUC calculations for afterhyperpolarization (AHP) using 0-1 s average as reference baseline
+                # AUC from 2 s to 2.5 s
+                mask_2_to_2_5s = (time_s >= 2.0) & (time_s <= 2.5)
+                if np.any(mask_2_to_2_5s):
+                    time_2_to_2_5s = time_s[mask_2_to_2_5s]
+                    baseline_2_to_2_5s = np.full_like(time_2_to_2_5s, avg_0_1s)
+                    actual_data_2_to_2_5s = voltage_mV[mask_2_to_2_5s]
+                    auc_2_to_2_5s = np.trapezoid(actual_data_2_to_2_5s - baseline_2_to_2_5s, time_2_to_2_5s)
+                else:
+                    auc_2_to_2_5s = 0
+
+                # AUC from 2 s to 3 s
+                mask_2_to_3s = (time_s >= 2.0) & (time_s <= 3.0)
+                if np.any(mask_2_to_3s):
+                    time_2_to_3s = time_s[mask_2_to_3s]
+                    baseline_2_to_3s = np.full_like(time_2_to_3s, avg_0_1s)
+                    actual_data_2_to_3s = voltage_mV[mask_2_to_3s]
+                    auc_2_to_3s = np.trapezoid(actual_data_2_to_3s - baseline_2_to_3s, time_2_to_3s)
+                else:
+                    auc_2_to_3s = 0
+
+                # AUC from 2 s to 4 s
+                mask_2_to_4s = (time_s >= 2.0) & (time_s <= 4.0)
+                if np.any(mask_2_to_4s):
+                    time_2_to_4s = time_s[mask_2_to_4s]
+                    baseline_2_to_4s = np.full_like(time_2_to_4s, avg_0_1s)
+                    actual_data_2_to_4s = voltage_mV[mask_2_to_4s]
+                    auc_2_to_4s = np.trapezoid(actual_data_2_to_4s - baseline_2_to_4s, time_2_to_4s)
+                else:
+                    auc_2_to_4s = 0
+
+                # AUC from 2 s to 8 s
+                mask_2_to_8s = (time_s >= 2.0) & (time_s <= 8.0)
+                if np.any(mask_2_to_8s):
+                    time_2_to_8s = time_s[mask_2_to_8s]
+                    baseline_2_to_8s = np.full_like(time_2_to_8s, avg_0_1s)
+                    actual_data_2_to_8s = voltage_mV[mask_2_to_8s]
+                    auc_2_to_8s = np.trapezoid(actual_data_2_to_8s - baseline_2_to_8s, time_2_to_8s)
+                else:
+                    auc_2_to_8s = 0
+
+                # Store results for this sweep
+                sweep_results = {
+                    'sweep_number': sweep_number,
+                    'avg_0_1s': avg_0_1s,
+                    'avg_2_49_2_5s': avg_2_49_2_5s,
+                    'avg_2_99_3s': avg_2_99_3s,
+                    'avg_3_99_4s': avg_3_99_4s,
+                    'action_potential_count': action_potential_count,
+                    'ap_times': ap_times,
+                    'auc_2_to_2_5s': auc_2_to_2_5s,
+                    'auc_2_to_3s': auc_2_to_3s,
+                    'auc_2_to_4s': auc_2_to_4s,
+                    'auc_2_to_8s': auc_2_to_8s
+                }
+                all_results.append(sweep_results)
+
+                # ==============================================================================
+                # PRINT MEASUREMENTS FOR THIS SWEEP
+                # ==============================================================================
+                print(f"\n{'=' * 50}")
+                print(f"MEASUREMENTS FOR CC SWEEP {sweep_number}")
+                print(f"{'=' * 50}")
+                print(f"1. Average voltage (0-1 s): {avg_0_1s:.2f} mV")
+                print(f"2. Average voltage (2.49-2.5 s): {avg_2_49_2_5s:.2f} mV")
+                print(f"3. Average voltage (2.99-3 s): {avg_2_99_3s:.2f} mV")
+                print(f"4. Average voltage (3.99-4 s): {avg_3_99_4s:.2f} mV")
+                print(f"5. Action potential count (threshold: {threshold} mV): {action_potential_count}")
+                if len(ap_times) > 0:
+                    print(f"   Action potential times: {[f'{t:.3f}' for t in ap_times]} s")
+                print(f"6. AHP AUC relative to 0-1 s baseline (afterhyperpolarization):")
+                print(f"   AUC 2-2.5 s: {auc_2_to_2_5s:.4f} mV·s")
+                print(f"   AUC 2-3 s: {auc_2_to_3s:.4f} mV·s")
+                print(f"   AUC 2-4 s: {auc_2_to_4s:.4f} mV·s")
+                print(f"   AUC 2-8 s: {auc_2_to_8s:.4f} mV·s")
+                print(f"{'=' * 50}")
+
+                # Plot the sweep with measurement annotations
+                plt.figure(figsize=(6, 6))
+                plt.plot(time_s, voltage_mV, 'black', linewidth=0.5, label='Data')
+
+                # Add shaded regions for measurement areas
+                plt.fill_between(time_s, voltage_mV, avg_0_1s, where=mask_0_1s, alpha=0.3, color='blue',
+                                 label='0-1 s region')
+                plt.fill_between(time_s, voltage_mV, avg_2_49_2_5s, where=mask_2_49_2_5s, alpha=0.3, color='red',
+                                 label='2.49-2.5 s region')
+                plt.fill_between(time_s, voltage_mV, avg_2_99_3s, where=mask_2_99_3s, alpha=0.3, color='green',
+                                 label='2.99-3 s region')
+                plt.fill_between(time_s, voltage_mV, avg_3_99_4s, where=mask_3_99_4s, alpha=0.3, color='orange',
+                                 label='3.99-4 s region')
+
+                # Add AUC shading for afterhyperpolarization relative to 0-1 s baseline
+                if np.any(mask_2_to_2_5s):
+                    plt.fill_between(time_s, voltage_mV, avg_0_1s, where=mask_2_to_2_5s, alpha=0.4, color='cyan',
+                                     label='AHP AUC 2-2.5 s')
+                if np.any(mask_2_to_3s):
+                    plt.fill_between(time_s, voltage_mV, avg_0_1s, where=mask_2_to_3s, alpha=0.3, color='magenta',
+                                     label='AHP AUC 2-3 s')
+                if np.any(mask_2_to_4s):
+                    plt.fill_between(time_s, voltage_mV, avg_0_1s, where=mask_2_to_4s, alpha=0.2, color='yellow',
+                                     label='AHP AUC 2-4 s')
+                if np.any(mask_2_to_8s):
+                    plt.fill_between(time_s, voltage_mV, avg_0_1s, where=mask_2_to_8s, alpha=0.1, color='brown',
+                                     label='AHP AUC 2-8 s')
+
+                # Add horizontal reference lines for averages
+                plt.axhline(y=avg_0_1s, color='blue', linestyle=':', alpha=0.7)
+                plt.axhline(y=avg_2_49_2_5s, color='red', linestyle=':', alpha=0.7)
+                plt.axhline(y=avg_2_99_3s, color='green', linestyle=':', alpha=0.7)
+                plt.axhline(y=avg_3_99_4s, color='orange', linestyle=':', alpha=0.7)
+
+                # Add action potential threshold line
+                plt.axhline(y=threshold, color='purple', linestyle='--', alpha=0.8,
+                            label=f'AP threshold ({threshold} mV)')
+
+                # Mark action potentials
+                if len(ap_times) > 0:
+                    ap_voltages = voltage_mV[rising_edges]
+                    plt.scatter(ap_times, ap_voltages, color='purple', s=50, zorder=5,
+                                label=f'Action potentials ({action_potential_count})')
+
+                plt.title(f'CC Current Clamp - Sweep {sweep_number}')
+                plt.xlabel("Time (s)")
+                plt.ylabel("Voltage (mV)")
+                plt.legend()
+                plt.grid(False)
+                plt.tight_layout()
+                plt.show()
+
+            except IndexError as e:
+                print(f"Error processing sweep {sweep_number}: {e}")
+                print(f"Skipping sweep {sweep_number}")
+                continue
+            except Exception as e:
+                print(f"Unexpected error processing sweep {sweep_number}: {e}")
+                print(f"Skipping sweep {sweep_number}")
+                continue
+
+        # ==============================================================================
+        # SUMMARY TABLE FOR ALL SWEEPS
+        # ==============================================================================
+        if all_results:  # Only print table if we have results
+            print(f"\n{'=' * 80}")
+            print("SUMMARY TABLE FOR ALL SWEEPS")
+            print(f"{'=' * 80}")
+            print(
+                f"{'Sweep':<6} {'0-1s avg':<10} {'2.49-2.5s':<10} {'2.99-3s':<10} {'3.99-4s':<10} {'AP count':<10} {'AUC 2-2.5s':<12} {'AUC 2-3s':<12} {'AUC 2-4s':<12} {'AUC 2-8s':<12}")
+            print(
+                f"{'No.':<6} {'(mV)':<10} {'(mV)':<10} {'(mV)':<10} {'(mV)':<10} {'(#)':<10} {'(mV·s)':<12} {'(mV·s)':<12} {'(mV·s)':<12} {'(mV·s)':<12}")
+            print(f"{'-' * 80}")
+
+            for result in all_results:
+                print(
+                    f"{result['sweep_number']:<6} {result['avg_0_1s']:<10.2f} {result['avg_2_49_2_5s']:<10.2f} {result['avg_2_99_3s']:<10.2f} {result['avg_3_99_4s']:<10.2f} {result['action_potential_count']:<10} {result['auc_2_to_2_5s']:<12.4f} {result['auc_2_to_3s']:<12.4f} {result['auc_2_to_4s']:<12.4f} {result['auc_2_to_8s']:<12.4f}")
+
+            print(f"{'=' * 80}")
+        else:
+            print("No valid results to display.")
+
+        return all_results
+
+def save_results_to_csv(file_path, cc_results, output_filename=None, file_location=None):
+    """Save all results to a CSV file with horizontal structure"""
+
+    # Generate output filename if not provided
+    if output_filename is None:
+        base_name = os.path.splitext(os.path.basename(file_path))[0]
+        output_filename = f"{base_name}_results.csv"
+
+    # Add file location if provided
+    if file_location is not None:
+        # Create directory if it doesn't exist
+        os.makedirs(file_location, exist_ok=True)
+        output_filename = os.path.join(file_location, output_filename)
+
+    # Get the base filename for the header
+    file_name = os.path.splitext(os.path.basename(file_path))[0]
+
+    with open(output_filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+
+        # Create the complete header row with everything
+        header_row = [file_name]
+
+        # Add CC section
+        header_row.extend([
+            'CC Current Clamp',
+            'Sweep No.',
+            '0-1s avg (mV)',
+            '2.49-2.5s (mV)',
+            '2.99-3s (mV)',
+            '3.99-4s (mV)',
+            'AP count (#)',
+            'AUC 2-2.5s (mV·s)',
+            'AUC 2-3s (mV·s)',
+            'AUC 2-4s (mV·s)',
+            'AUC 2-8s (mV·s)'
+        ])
+
+        # Add new columns before CC section
+        header_row.extend([
+            'IC (pA)'
+        ])
+
+        writer.writerow(header_row)
+
+        # Find the maximum number of sweeps across all datasets
+        max_sweeps = len(cc_results)
+
+        # Write data rows (starting from row 2)
+        for i in range(max_sweeps):
+            data_row = ['']  # Empty first column
+
+            # CC data
+            data_row.append('')  # Empty for section header column
+            if i < len(cc_results):
+                result = cc_results[i]
+                data_row.extend([
+                    result['sweep_number'],
+                    f"{result['avg_0_1s']:.2f}",
+                    f"{result['avg_2_49_2_5s']:.2f}",
+                    f"{result['avg_2_99_3s']:.2f}",
+                    f"{result['avg_3_99_4s']:.2f}",
+                    result['action_potential_count'],
+                    f"{result['auc_2_to_2_5s']:.4f}",
+                    f"{result['auc_2_to_3s']:.4f}",
+                    f"{result['auc_2_to_4s']:.4f}",
+                    f"{result['auc_2_to_8s']:.4f}"
+                ])
+            else:
+                data_row.extend(['', '', '', '', '', '', '', '', '', ''])  # Empty columns
+
+            if i < len(cc_results):
+                sweep_number = cc_results[i]['sweep_number']
+                access_resistance = -20 + (sweep_number - 1) * 20  # If sweep_number starts at 1
+                data_row.extend([
+                    f"{access_resistance:.2f}"
+                ])
+            else:
+                data_row.extend([''])
+
+
+            writer.writerow(data_row)
+
+        # Add some empty rows before action potential times
+        writer.writerow([])
+        writer.writerow([])
+        writer.writerow([])
+        writer.writerow([])
+        writer.writerow([])
+
+        # Action Potential Times Section
+        writer.writerow(['Action Potential Times (s)'])
+        writer.writerow(['Sweep No.', 'AP Times'])
+
+        for result in cc_results:
+            if result['ap_times'] is not None and len(result['ap_times']) > 0:
+                ap_times_str = ', '.join([f"{t:.3f}" for t in result['ap_times']])
+                writer.writerow([result['sweep_number'], ap_times_str])
+            else:
+                writer.writerow([result['sweep_number'], 'No action potentials'])
+
+    print(f"\nResults saved to: {output_filename}")
+    return output_filename
+
+# ==============================================================================
+# MAIN EXECUTION
+# ==============================================================================
+
+#Altered approach to manually enter path
+path = input('Enter file path for analysis: ')
+file_path = path.strip("'")
+path_object= Path(file_path)
+filename = path_object.stem
+
+#Select original path for export
+export_path = path_object.parent
+export_path = str(export_path) + '/Exports/CC_DDI'
+export_dir = Path(export_path)
+export_dir.mkdir(parents=True, exist_ok=True)
+
+# Explore file structure
+print("Exploring file structure...")
+datasets = explore_h5(file_path)
+
+print(f"\n{'=' * 60}")
+print("PLOTTING CC SWEEP")
+print(f"{'=' * 60}")
+
+# Plot the specified sweep from CC dataset and store results
+cc_results = plot_CC(file_path)
+
+# Save with custom filename and location
+base_filename = os.path.splitext(os.path.basename(file_path))[0]
+output_name = f"{base_filename}.csv"
+save_results_to_csv(file_path, cc_results,
+                    output_filename=output_name, file_location=export_dir)
+
+meta_analysis(export_dir, str(filename), runs)
