@@ -33,11 +33,11 @@ def plot_line(dataset,
                         title, 
                         ylabel, 
                         xlabel='Sweeps',
-                        drug_region=(4, 8),
+                        drug_region=(5, 10),
                         drug_alpha=0.2,
                         drug_color='gray',
                         figsize=(8, 6),
-                        show_legend=True):
+                        show_legend=False):
     """
     Plot a single dataset as a line with SEM (standard error of mean) shading.
     
@@ -71,10 +71,10 @@ def plot_line(dataset,
     mean = norm.mean(axis=1)  # Mean across columns (cells)
     sem = norm.std(axis=1) / np.sqrt(norm.shape[1])
         
-    x = np.arange(len(mean))
+    x = np.arange(1, (len(mean)+1))
         
     # Plot mean line
-    ax.plot(x, mean, label='GFP+', color=color, linewidth=2)
+    ax.plot(x, mean, color=color, linewidth=2)
         
     # Plot SEM shading
     ax.fill_between(x, mean - sem, mean + sem, alpha=0.3, color=color)
@@ -271,7 +271,6 @@ class CumulativeProbabilityStats:
             f"Drug      — n={self.drug_n},  mean={self.drug_mean:.3f}, median={self.drug_median:.3f}\n"
         )
 
-
 def _significance_label(p: float) -> str:
     """Convert p-value to asterisk notation."""
     if p < 0.001:
@@ -283,14 +282,13 @@ def _significance_label(p: float) -> str:
     else:
         return "ns"
 
-
 def plot_cumulative_probability(
     df: pd.DataFrame | list[pd.DataFrame],  # accept either
     column: str,
     n_bootstrap: int = 1000,
     confidence: float = 0.95,
-    baseline_sweeps: tuple = (0, 3),
-    drug_sweeps: tuple = (4, 8),
+    baseline_sweeps: tuple = (0, 5),
+    drug_sweeps: tuple = (5, 10),
     ax: plt.Axes = None,
     title: str = None,
 ) -> tuple[plt.Figure, plt.Axes, CumulativeProbabilityStats]:
