@@ -781,7 +781,7 @@ def plot_event_overlay_BL(file_path):
     # Analysis window parameters
     analysis_start_time = 0.0
     #Adjust following for the duration of your analysis - automatically 5 min baseline
-    analysis_duration = 300
+    analysis_duration = 240 #not sure about this
 
     # Event overlay parameters
     pre_event_time = 0.025  # 25 ms before event peak
@@ -801,7 +801,7 @@ def plot_event_overlay_BL(file_path):
         all_events = []
 
         num_samples = data.shape[0]
-        sampling_rate = 10000
+        sampling_rate = 20000
         time_axis = np.arange(num_samples) / sampling_rate
         sweep_duration_s = time_axis[-1]
 
@@ -919,12 +919,12 @@ def plot_event_overlay_BL(file_path):
             print("No valid event traces extracted")
 
 def plot_event_overlay_app(file_path):
-    """Plot all detected events overlaid during drug applicationwith average waveform using improved peak alignment"""
+    """Plot all detected events overlaid during drug application with average waveform using improved peak alignment"""
 
     # ==============================================================================
     # MODIFY THESE VALUES FOR YOUR ANALYSIS (same as plot_event_detection)
     # ==============================================================================
-    sweep_numbers = [5,6,7,8,9]
+    sweep_numbers = [4,5,6,7,8] #to check
 
     #Following loop will dynamically find the VC_Cont dataset
     with h5py.File(file_path, 'r') as f:
@@ -949,7 +949,7 @@ def plot_event_overlay_app(file_path):
     # Analysis window parameters
     analysis_start_time = 0.0
     #Adjust following for the duration of your analysis - automatically 5 min baseline
-    analysis_duration = 300
+    analysis_duration = 240 #not sure about this
 
     # Event overlay parameters
     pre_event_time = 0.025  # 25 ms before event peak
@@ -969,7 +969,7 @@ def plot_event_overlay_app(file_path):
         all_events = []
 
         num_samples = data.shape[0]
-        sampling_rate = 10000
+        sampling_rate = 20000
         time_axis = np.arange(num_samples) / sampling_rate
         sweep_duration_s = time_axis[-1]
 
