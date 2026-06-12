@@ -171,6 +171,10 @@ def plot_VC(file_path):
             plt.axhline(y=baseline_avg, color='blue', linestyle=':', alpha=0.7)
             plt.axhline(y=avg_90_95, color='green', linestyle=':', alpha=0.7)
 
+            # Flip the plotted current scale so higher values appear lower on the figure
+            plt.gca().invert_yaxis()
+            plt.gca().invert_xaxis()
+
             plt.title(f'VC BEGIN - Sweep {sweep_number}')
             plt.xlabel("Time (ms)")
             plt.ylabel("Current (pA)")
@@ -341,6 +345,9 @@ def plot_VC2(file_path):
             # Add horizontal reference lines for averages
             plt.axhline(y=baseline_avg, color='blue', linestyle=':', alpha=0.7)
             plt.axhline(y=avg_90_95, color='green', linestyle=':', alpha=0.7)
+
+            # Flip the plotted current scale so higher values appear lower on the figure
+            plt.gca().invert_yaxis()
 
             plt.title(f'VC END - Sweep {sweep_number}')
             plt.xlabel("Time (ms)")

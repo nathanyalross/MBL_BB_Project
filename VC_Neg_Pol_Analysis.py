@@ -400,7 +400,7 @@ def plot_VC(file_path):
                 dataset_name = f'Data/{key}'
                 break
     
-    #dataset_name = 'Data/R2_S1_VC_Continuous'  #If you need to manually set the dataset name set it here
+    #dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     with h5py.File(file_path, 'r') as f:
         data = f[dataset_name][:]
@@ -468,7 +468,7 @@ def plot_VC(file_path):
         scale_bar_y = all_current.min() + 0.10 * current_range
         
         # Draw horizontal scale bar (time)
-        ax.plot([scale_bar_x, scale_bar_x + time_scale_bar], 
+        ax.plot([scale_bar_x, scale_bar_x - time_scale_bar], 
                 [scale_bar_y, scale_bar_y], 
                 color='black', linewidth=3)
         
@@ -479,7 +479,7 @@ def plot_VC(file_path):
         
         # Add labels centered along scale bars
         # Time label (centered below horizontal bar)
-        ax.text(scale_bar_x + time_scale_bar/2, 
+        ax.text(scale_bar_x - time_scale_bar/2, 
                 scale_bar_y - 0.05 * current_range,
                 '60 s', 
                 ha='center', va='top', fontsize=10, color='black')
@@ -538,7 +538,7 @@ def plot_event_detection(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-        #dataset_name = 'Data/R10_S1_VC_Continuous'   #If you need to set dataset name manually do it here
+        #dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
         
         print(f"Using dataset: {dataset_name}")
         data = f[dataset_name][:]
@@ -763,7 +763,7 @@ def plot_event_overlay(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-    #dataset_name = 'Data/R10_S1_VC_Continuous'   #If you need to manually set the dataset name do that here
+    dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     # Detection parameters - keep same as plot_event_detection
     threshold_factor = 4.0  # Threshold = threshold_factor * noise_std
@@ -922,13 +922,12 @@ def plot_event_overlay(file_path):
 
 #Altered approach to manually enter path
 path = input('Enter file path for analysis: ')
-file_path = path.strip("'")
-path_object= Path(file_path)
+file_path = path.strip().strip('"').strip("'")
+
+path_object = Path(file_path)
 filename = path_object.stem
 
-export_path = path_object.parent
-export_path = str(export_path) + '/Exports'
-export_dir = Path(export_path)
+export_dir = path_object.parent / "Exports"
 export_dir.mkdir(parents=True, exist_ok=True)
 
 # Explore file structure
