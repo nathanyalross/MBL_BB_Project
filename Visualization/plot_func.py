@@ -28,12 +28,12 @@ def data_analysis(data_1, data_2):
                 t_stat, p_value = stats.ttest_ind(data_1,data_2)
                 return (t_stat, p_value, 'T-test')
 
-def plot_line_two_datasets(dataset, 
+def plot_line(dataset,
                         color,
                         title, 
                         ylabel, 
                         xlabel='Sweeps',
-                        drug_region=(3, 8),
+                        drug_region=(5, 9),
                         drug_alpha=0.2,
                         drug_color='gray',
                         figsize=(8, 6),
@@ -63,7 +63,7 @@ def plot_line_two_datasets(dataset,
 
     #Normalize values to baseline for each cell
     #Calculate baseline frequency by averaging first 5 sweeps
-    bl_mean = dataset.iloc[0:5,:].mean(axis = 0)
+    bl_mean = dataset.iloc[0:4,:].mean(axis = 0)
     #Divide all values by bl mean
     norm = dataset.div(bl_mean)
     
@@ -289,8 +289,8 @@ def plot_cumulative_probability(
     column: str,
     n_bootstrap: int = 1000,
     confidence: float = 0.95,
-    baseline_sweeps: tuple = (1, 3),
-    drug_sweeps: tuple = (4, 8),
+    baseline_sweeps: tuple = (1, 4),
+    drug_sweeps: tuple = (5, 9),
     ax: plt.Axes = None,
     title: str = None,
 ) -> tuple[plt.Figure, plt.Axes, CumulativeProbabilityStats]:

@@ -4,7 +4,7 @@ import pandas as pd
 
 
 #Set Paths for analysis
-raw_data = ['/Volumes/SSK SSD/Projects/Muscarine GCs/05-13-26/Exports/NR_260513_2.csv']
+raw_data = ['E:/MBL_neurobiology/bulb_baddies/Exports/260610_1.csv']
 
 #Load in data
 data = []

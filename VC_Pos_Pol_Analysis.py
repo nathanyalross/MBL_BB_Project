@@ -754,7 +754,7 @@ def plot_event_overlay_BL(file_path):
     # ==============================================================================
     # MODIFY THESE VALUES FOR YOUR ANALYSIS (same as plot_event_detection)
     # ==============================================================================
-    sweep_numbers = [1,2,3,4,5]#,6,7,8,9,10,11,12,13,14,15]
+    sweep_numbers = [1,2,3,4]#,6,7,8,9,10,11,12,13,14,15]
 
     #Following loop will dynamically find the VC_Cont dataset
     with h5py.File(file_path, 'r') as f:
@@ -765,7 +765,7 @@ def plot_event_overlay_BL(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-    dataset_name = 'Data/R12_S1_VC_cont'   #If you need to set dataset name manually do it here
+    #dataset_name = 'Data/R12_S1_VC_cont'   #If you need to set dataset name manually do it here
 
     # Detection parameters - keep same as plot_event_overlay
     threshold_factor = 4 # Threshold = threshold_factor * noise_std
@@ -924,18 +924,18 @@ def plot_event_overlay_app(file_path):
     # ==============================================================================
     # MODIFY THESE VALUES FOR YOUR ANALYSIS (same as plot_event_detection)
     # ==============================================================================
-    sweep_numbers = [7,8,9,10,11,12]
+    sweep_numbers = [5,6,7,8,9]
 
     #Following loop will dynamically find the VC_Cont dataset
     with h5py.File(file_path, 'r') as f:
         # Search for VC_Continuous dataset in Data group
         dataset_name = None
         for key in f['Data'].keys():
-            if re.match(r'R\d+_S\d+_VC_Continuous', key):
+            if re.match(r'R\d+_S\d+_VC_cont', key):
                 dataset_name = f'Data/{key}'
                 break
 
-    Dataset_name = 'Data/R12_S1_VC_Continuous'   #If you need to set dataset name manually do it here
+    #Dataset_name = 'Data/R12_S1_VC_Continuous'   #If you need to set dataset name manually do it here
 
     # Detection parameters - keep same as plot_event_overlay
     threshold_factor = 4 # Threshold = threshold_factor * noise_std
