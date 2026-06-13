@@ -442,11 +442,11 @@ def plot_VC(file_path):
         # Search for VC_Continuous dataset in Data group
         dataset_name = None
         for key in f['Data'].keys():
-            if re.match(r'R\d+_S\d+_VC_Continuous', key):
+            if re.match(r'R\d+_S\d+_VC_cont', key):
                 dataset_name = f'Data/{key}'
                 break
     
-    #dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
+    dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     with h5py.File(file_path, 'r') as f:
         data = f[dataset_name][:]
@@ -585,11 +585,11 @@ def plot_event_detection(file_path):
         # Search for VC_Continuous dataset in Data group
         dataset_name = None
         for key in f['Data'].keys():
-            if re.match(r'R\d+_S\d+_VC_Continuous', key):
+            if re.match(r'R\d+_S\d+_VC_cont', key):
                 dataset_name = f'Data/{key}'
                 break
 
-        #dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
+        #dataset_name = 'Data/R4_S1_VC_cont'  #If you need to manually set the dataset name set it here
         
         print(f"Using dataset: {dataset_name}")
         data = f[dataset_name][:]
@@ -815,11 +815,11 @@ def plot_event_overlay_BL(file_path):
         # Search for VC_Continuous dataset in Data group
         dataset_name = None
         for key in f['Data'].keys():
-            if re.match(r'R\d+_S\d+_VC_Continuous', key):
+            if re.match(r'R\d+_S\d+_VC_cont', key):
                 dataset_name = f'Data/{key}'
                 break
 
-    #dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
+    #dataset_name = 'Data/R4_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     # Detection parameters - keep same as plot_event_detection
     threshold_factor = 4.0  # Threshold = threshold_factor * noise_std
@@ -994,7 +994,7 @@ def plot_event_overlay_app(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-    #dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
+    #dataset_name = 'Data/R4_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     # Detection parameters - keep same as plot_event_detection
     threshold_factor = 4.0  # Threshold = threshold_factor * noise_std
