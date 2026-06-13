@@ -7,12 +7,11 @@ from pathlib import Path
 from scipy import signal
 from scipy.optimize import curve_fit
 from scipy.integrate import trapezoid  # modern alternative to np.trapz
-from scipy.signal import iirnotch, filtfilt
+from scipy.signal import iirnotch, filtfilt, welch
 import os
 import json
 from datetime import datetime
 from typing import List, Dict, Any
-
 
 #Initiate list of paramaters for analysis
 params = []
@@ -139,7 +138,7 @@ def explore_h5(file_path):
 
     return datasets
 
-def apply_line_filter(data, sampling_rate, freq=60.0, quality_factor=30.0):
+def apply_line_filter(data, sampling_rate, freq=60.0, quality_factor=30.0, harmonics=1):
     """
     Apply a notch filter to remove line noise (default 60 Hz).
 
@@ -159,9 +158,12 @@ def apply_line_filter(data, sampling_rate, freq=60.0, quality_factor=30.0):
     filtered_data : ndarray
         Line-noise filtered trace.
     """
-    b, a = iirnotch(freq, quality_factor, sampling_rate)
-    filtered_data = filtfilt(b, a, data)
-    
+    filtered_data = data.copy()
+    for n in range(1, harmonics + 1):
+        harmonic_freq = freq * n
+        if harmonic_freq < sampling_rate / 2:  # must be below Nyquist
+            b, a = iirnotch(harmonic_freq, quality_factor, sampling_rate)
+            filtered_data = filtfilt(b, a, filtered_data)
     return filtered_data
 
 def apply_lowpass_filter(data, cutoff_hz=1500, sampling_rate=20000, order=4):
@@ -446,7 +448,7 @@ def plot_VC(file_path):
                 dataset_name = f'Data/{key}'
                 break
     
-    dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
+    #dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     with h5py.File(file_path, 'r') as f:
         data = f[dataset_name][:]
@@ -648,6 +650,19 @@ def plot_event_detection(file_path):
             all_events.extend(events)
             all_time.extend(time_sweep)
             all_current.extend(current_pA)
+
+            #Optional Power Spectrum Analysis for noisy recordings
+            #freqs, power = welch(current_pA, fs=20000, nperseg=4096)
+            #mask = freqs <= 2500  # actual Hz cutoff
+            #plt.semilogy(freqs[mask], power[mask])
+            #plt.semilogy(freqs[:500], power[:500])  # plot 0-500 Hz
+            #plt.xlabel('Frequency (Hz)')
+            #plt.ylabel('Power')
+            #plt.axvline(60, color='r', linestyle='--', label='60 Hz')
+            #plt.axvline(120, color='g', linestyle='--', label='120 Hz')
+            #plt.axvline(180, color='b', linestyle='--', label='180 Hz')
+            #plt.legend()
+            #plt.show()
 
         # Convert to numpy arrays
         all_time = np.array(all_time)
