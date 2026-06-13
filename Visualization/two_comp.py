@@ -8,9 +8,9 @@ from plot_func import plot_line
 
 #Set Paths for analysis
 data_paths = ["E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260606_1_summary.csv",
-              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260609_0_summary.csv",
-              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_0_summary.csv",
-              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_3_summary.csv",
+              #"E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260609_0_summary.csv", #weird noise
+              #"E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_0_summary.csv", #weird noise
+              #"E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_3_summary.csv", #weird noise
               "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260612_6_summary.csv",
               "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260613_1_summary.csv"
               ] #should be summary file
@@ -20,7 +20,7 @@ statistics = pd.DataFrame(columns = ['Test Statistic', 'P-value', 'Test Used'])
 
 #Initiate list to hold pandas dataframes
 data = []
-#Liad in data for GFP+
+#Load in data
 for path in data_paths:
     df = pd.read_csv(path, index_col=False)
     #set index as the sweep column
@@ -35,7 +35,7 @@ for path in data_paths:
 #First, load in and plot data
 bl_freqs = []
 drug_freqs = []
-#Extract GFP+ data
+#Extract BL vs drug data
 freq_data= pd.DataFrame()
 i=0
 for d in data:
@@ -56,7 +56,7 @@ for d in data:
 
 #Plot titles and labels
 freq_title = 'Event Frequency'
-freq_y_label = 'Frequency'
+freq_y_label = 'Frequency (Hz)'
 
 #Line Colors (color names or hex codes)
 line1_color = "#459B3D"
@@ -64,7 +64,7 @@ line2_color = "#BED2BC"
 
 freq_plot = plot_line(freq_data, line1_color, freq_title, freq_y_label)
 
-#Statistical comparisons within GFP+
+#Statistical comparisons baseline vs drug
 freq_title = 'Frequency'
 freq_x_label = ['BL', 'Muscarine']
 
@@ -136,7 +136,7 @@ for d in data:
 
 #Plot titles and labels
 amp_title = 'Event Amplitude'
-amp_y_label = 'Amplitude'
+amp_y_label = 'Amplitude (pA)'
 
 #Line Colors (color names or hex codes)
 line1_color = "#459B3D"
@@ -144,7 +144,7 @@ line2_color = "#BED2BC"
 
 amplitude_plot = plot_line(amp_data, line1_color, amp_title, amp_y_label)
 
-#Statistical comparisons within GFP+
+#Statistical comparisons baseline vs drug
 amp_title = 'Amplitude'
 amp_x_label = ['BL', 'Muscarine']
 
@@ -176,7 +176,7 @@ for d in data:
 
 #Plot titles and labels
 rise_title = 'Event Rise Time'
-rise_y_label = 'Normalized Rise Time'
+rise_y_label = 'Rise Time (ms)'
 
 #Line Colors (color names or hex codes)
 line1_color = "#459B3D"
@@ -190,6 +190,47 @@ rise_x_label = ['BL', 'Muscarine']
 
 rise_bar, test_stat, p_val, test = plot_bar_two_datasets(bl_rise, line1_color,  drug_rise, line2_color, rise_x_label, rise_title, rise_y_label)
 statistics.loc['Rise Time'] = [test_stat, p_val, test]
+
+#############################
+# Plot Decay Time Timeseries #
+#############################
+
+#First, load in and plot data
+bl_decay = []
+drug_decay = []
+#Extract data
+decay_data= pd.DataFrame()
+i=0
+for d in data:
+    #Select data in rise time column and append to dataframe
+    decay = d['Decay tau (ms)'].to_list()
+    #Find average rise time for first 5 minutes
+    bl_decay_val = np.nanmean(decay[0:4])
+    bl_decay.append(bl_decay_val)
+    #Find average decay time for minute 7-12 (drug application)
+    drug_decay_val = np.nanmean(decay[4:9])
+    drug_decay.append(drug_decay_val)
+    #Append values to dataframe for graphing
+    decay_data[f'Cell_{i}']=decay
+    i=i+1
+
+#Plot titles and labels
+decay_title = 'Event Decay Time'
+decay_y_label = 'Decay Time (ms)'
+
+#Line Colors (color names or hex codes)
+line1_color = "#459B3D"
+line2_color = "#BED2BC" 
+
+decay_time_plot = plot_line(decay_data, line1_color, decay_title, decay_y_label)
+
+#Statistical comparisons 
+decay_title = 'Decay Time'
+decay_x_label = ['BL', 'Muscarine']
+
+decay_bar, test_stat, p_val, test = plot_bar_two_datasets(bl_decay, line1_color,  drug_decay, line2_color, decay_x_label, decay_title, decay_y_label)
+statistics.loc['Decay Time'] = [test_stat, p_val, test]
+
 
 ################
 # Export Plots #
@@ -222,6 +263,11 @@ export_path = export_dir / f"{groupname}_VC_Rise_Time_line.pdf"
 rise_time_plot.savefig(export_path)
 export_path = export_dir / f"{groupname}_VC_Rise_Time_bar.pdf"
 rise_bar.savefig(export_path)
+
+export_path = export_dir / f"{groupname}_VC_Decay_Time_line.pdf"
+decay_time_plot.savefig(export_path)
+export_path = export_dir / f"{groupname}_VC_Decay_Time_bar.pdf"
+decay_bar.savefig(export_path)
 
 export_path = export_dir /f"{groupname}_stats.csv"
 statistics.to_csv(export_path, index=True)
