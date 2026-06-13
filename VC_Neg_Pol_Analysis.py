@@ -11,6 +11,9 @@ import os
 import json
 from datetime import datetime
 from typing import List, Dict, Any
+from scipy.signal import find_peaks, butter, filtfilt
+from concurrent.futures import ThreadPoolExecutor
+
 
 #Initiate list of paramaters for analysis
 params = []
@@ -274,34 +277,53 @@ def analyze_event(data, time_axis, peak_idx, baseline_value):
 
     # Decay tau
     decay_start_idx = peak_idx
-    #Decay end is set as min between end of sweep and peak idx + (0.1/sampling rate, 2000 for 20 kHz)
     decay_end_idx = min(len(data), peak_idx + int(0.100 / dt_seconds))
-    decay_tau = 0.020
+    decay_tau = 0.020  # default fallback
+
     if decay_end_idx > decay_start_idx + 20:
         try:
-            #Timeseries data between peak and decay end window
-            decay_data = data[decay_start_idx:decay_end_idx] - event_baseline
-            decay_data = event_baseline - data[decay_start_idx:decay_end_idx]  # Invert data for fit
-            #Time of decay pulled (length of decay start index)
+            # Work on baseline-subtracted, positive-polarity snippet
+            tempwav = event_baseline - data[decay_start_idx:decay_end_idx]
             decay_time = time_axis[decay_start_idx:decay_end_idx] - time_axis[decay_start_idx]
-            #If time is in ms as determined earlier, then divide decay time by 1000 to get seconds
             if time_in_ms:
                 decay_time = decay_time / 1000
-            ### If the decay timeseries is greter than 10% of amplitude (flawed due to not taking into account baseline?)
-            valid = decay_data > (0.1 * peak_amplitude)
-            if np.sum(valid) > 10:
-                popt, _ = curve_fit(
-                    lambda t, A, tau: A * np.exp(-t / tau),
-                    decay_time[valid],
-                    decay_data[valid],
-                    p0=[peak_amplitude, 0.020],
-                    bounds=([0, 0.001], [5 * peak_amplitude, 0.200]),
-                    maxfev=1000
-                )
-                if 0.001 <= popt[1] <= 0.200:
-                    decay_tau = popt[1]
+
+            # --- Step 1: 1/e decay time (time to 37% of peak amplitude) ---
+            lamp = 0.37 * peak_amplitude
+            lamp_idx = np.where(tempwav <= lamp)[0]
+
+            if len(lamp_idx) > 0:
+                decay_T = lamp_idx[0] / dt  # seconds
+
+                # --- Step 2: Double-exponential fit ---
+                # Fit window: from peak to 5x the 1/e decay time
+                fit_end = min(int(decay_T * 5 * dt), len(tempwav) - 1)
+
+                if fit_end > 2 and tempwav[0] != 0:
+                    tofity = tempwav[:fit_end].astype(float) / tempwav[0]  # normalise to 1
+                    tofitx = decay_time[:fit_end].copy()
+                    tofitx = tofitx - tofitx[0]  # zero-centre time axis
+
+                    def _double_exp(x, a, b, c, d):
+                        return a * np.exp(b * x) + c * np.exp(d * x)
+
+                    p0 = [0.6, -1 / decay_T, 0.4, -5 / decay_T]
+                    popt, _ = curve_fit(
+                        _double_exp, tofitx, tofity, p0=p0,
+                        maxfev=5000,
+                        bounds=([-np.inf, -np.inf, -np.inf, -np.inf],
+                                [np.inf, 0, np.inf, 0])
+                    )
+                    a, b, c, d = popt
+
+                    # Weighted tau: (A1*t1 + A2*t2) / (A1 + A2)
+                    t_val = abs(((a * (1 / b)) + (c * (1 / d))) / (a + c))
+
+                    if 0.001 <= t_val <= 0.300:  # sanity check
+                        decay_tau = t_val
+
         except Exception:
-            pass
+            pass  # fallback stays at 0.020
 
     # Charge calculation
     charge_end_idx = next(
@@ -396,7 +418,7 @@ def plot_VC(file_path):
         # Search for VC_Continuous dataset in Data group
         dataset_name = None
         for key in f['Data'].keys():
-            if re.match(r'R\d+_S\d+_VC_cont', key):
+            if re.match(r'R\d+_S\d+_VC_Continuous', key):
                 dataset_name = f'Data/{key}'
                 break
     
@@ -534,7 +556,7 @@ def plot_event_detection(file_path):
         # Search for VC_Continuous dataset in Data group
         dataset_name = None
         for key in f['Data'].keys():
-            if re.match(r'R\d+_S\d+_VC_cont', key):
+            if re.match(r'R\d+_S\d+_VC_Continuous', key):
                 dataset_name = f'Data/{key}'
                 break
 
@@ -759,11 +781,11 @@ def plot_event_overlay(file_path):
         # Search for VC_Continuous dataset in Data group
         dataset_name = None
         for key in f['Data'].keys():
-            if re.match(r'R\d+_S\d+_VC_cont', key):
+            if re.match(r'R\d+_S\d+_VC_Continuous', key):
                 dataset_name = f'Data/{key}'
                 break
 
-    dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
+    #dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     # Detection parameters - keep same as plot_event_detection
     threshold_factor = 4.0  # Threshold = threshold_factor * noise_std
