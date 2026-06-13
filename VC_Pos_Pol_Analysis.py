@@ -417,7 +417,7 @@ def plot_VC(file_path):
                 dataset_name = f'Data/{key}'
                 break
     
-    #dataset_name = 'Data/R12_S1_VC_cont'  #If you need to manually set the dataset name set it here
+    #dataset_name = 'Data/R4_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     with h5py.File(file_path, 'r') as f:
         data = f[dataset_name][:]
@@ -559,7 +559,7 @@ def plot_event_detection(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-        #dataset_name = 'Data/R12_S1_VC_cont'   #If you need to set dataset name manually do it here
+        #dataset_name = 'Data/R4_S1_VC_cont'   #If you need to set dataset name manually do it here
         
         print(f"Using dataset: {dataset_name}")
         data = f[dataset_name][:]
@@ -784,7 +784,7 @@ def plot_event_overlay_BL(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-    #dataset_name = 'Data/R12_S1_VC_cont'   #If you need to set dataset name manually do it here
+    #dataset_name = 'Data/R4_S1_VC_cont'   #If you need to set dataset name manually do it here
 
     # Detection parameters - keep same as plot_event_overlay
     threshold_factor = 4 # Threshold = threshold_factor * noise_std
@@ -800,7 +800,7 @@ def plot_event_overlay_BL(file_path):
     # Analysis window parameters
     analysis_start_time = 0.0
     #Adjust following for the duration of your analysis - automatically 5 min baseline
-    analysis_duration = 300
+    analysis_duration = 240 #not sure about this
 
     # Event overlay parameters
     pre_event_time = 0.025  # 25 ms before event peak
@@ -820,7 +820,7 @@ def plot_event_overlay_BL(file_path):
         all_events = []
 
         num_samples = data.shape[0]
-        sampling_rate = 10000
+        sampling_rate = 20000
         time_axis = np.arange(num_samples) / sampling_rate
         sweep_duration_s = time_axis[-1]
 
@@ -938,12 +938,12 @@ def plot_event_overlay_BL(file_path):
             print("No valid event traces extracted")
 
 def plot_event_overlay_app(file_path):
-    """Plot all detected events overlaid during drug applicationwith average waveform using improved peak alignment"""
+    """Plot all detected events overlaid during drug application with average waveform using improved peak alignment"""
 
     # ==============================================================================
     # MODIFY THESE VALUES FOR YOUR ANALYSIS (same as plot_event_detection)
     # ==============================================================================
-    sweep_numbers = [5,6,7,8,9]
+    sweep_numbers = [5,6,7,8,9] #to check
 
     #Following loop will dynamically find the VC_Cont dataset
     with h5py.File(file_path, 'r') as f:
@@ -954,7 +954,7 @@ def plot_event_overlay_app(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-    #Dataset_name = 'Data/R12_S1_VC_Continuous'   #If you need to set dataset name manually do it here
+    #Dataset_name = 'Data/R4_S1_VC_cont'   #If you need to set dataset name manually do it here
 
     # Detection parameters - keep same as plot_event_overlay
     threshold_factor = 4 # Threshold = threshold_factor * noise_std
@@ -968,7 +968,7 @@ def plot_event_overlay_app(file_path):
     # Analysis window parameters
     analysis_start_time = 0.0
     #Adjust following for the duration of your analysis - automatically 5 min baseline
-    analysis_duration = 300
+    analysis_duration = 240 #not sure about this
 
     # Event overlay parameters
     pre_event_time = 0.025  # 25 ms before event peak
@@ -988,7 +988,7 @@ def plot_event_overlay_app(file_path):
         all_events = []
 
         num_samples = data.shape[0]
-        sampling_rate = 10000
+        sampling_rate = 20000
         time_axis = np.arange(num_samples) / sampling_rate
         sweep_duration_s = time_axis[-1]
 

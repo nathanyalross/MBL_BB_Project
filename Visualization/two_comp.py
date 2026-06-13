@@ -7,7 +7,10 @@ from plot_func import plot_bar_two_datasets
 from plot_func import plot_line
 
 #Set Paths for analysis
-data_paths = ["E:/MBL_neurobiology/bulb_baddies/Exports/260610_1_summary.csv"] #should be summary file
+data_paths = ["E:/MBL_neurobiology/bulb_baddies/Exports/260606_1_summary.csv",
+              "E:/MBL_neurobiology/bulb_baddies/Exports/260609_0_summary.csv",
+              "E:/MBL_neurobiology/bulb_baddies/Exports/260611_3_summary.csv"
+              ] #should be summary file
 
 statistics = pd.DataFrame(columns = ['Test Statistic', 'P-value', 'Test Used'])
 
@@ -50,7 +53,7 @@ for d in data:
 
 #Plot titles and labels
 freq_title = 'Event Frequency'
-freq_y_label = 'Normalized Frequency'
+freq_y_label = 'Frequency'
 
 #Line Colors (color names or hex codes)
 line1_color = "#459B3D"
@@ -119,10 +122,10 @@ for d in data:
     #Select data in amplitude column and append to dataframe
     amp = d['Amplitude (pA)'].to_list()
     #Find average amplitude for first 5 minutes
-    bl_amp_val = np.mean(amp[0:4])
+    bl_amp_val = np.nanmean(amp[0:4])
     bl_amp.append(bl_amp_val)
     #Find average amplitude for minute 7-12 (drug application)
-    drug_amp_val = np.mean(amp[4:9])
+    drug_amp_val = np.nanmean(amp[4:9])
     drug_amp.append(drug_amp_val)
     #Append values to dataframe for graphing
     amp_data[f'Cell_{i}']=amp
@@ -130,7 +133,7 @@ for d in data:
 
 #Plot titles and labels
 amp_title = 'Event Amplitude'
-amp_y_label = 'Normalized Amplitude'
+amp_y_label = 'Amplitude'
 
 #Line Colors (color names or hex codes)
 line1_color = "#459B3D"
@@ -159,10 +162,10 @@ for d in data:
     #Select data in rise time column and append to dataframe
     rise = d['Rise time (ms)'].to_list()
     #Find average rise time for first 5 minutes
-    bl_rise_val = np.mean(rise[0:4])
+    bl_rise_val = np.nanmean(rise[0:4])
     bl_rise.append(bl_rise_val)
     #Find average rise time for minute 7-12 (drug application)
-    drug_rise_val = np.mean(rise[4:9])
+    drug_rise_val = np.nanmean(rise[4:9])
     drug_rise.append(drug_rise_val)
     #Append values to dataframe for graphing
     rise_data[f'Cell_{i}']=rise

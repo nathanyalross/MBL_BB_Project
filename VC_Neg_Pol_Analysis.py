@@ -768,13 +768,13 @@ def plot_event_detection(file_path):
         event_df = pd.DataFrame(event_data)
         return sum_df,event_df
 
-def plot_event_overlay(file_path):
-    """Plot all detected events overlaid with average waveform using improved peak alignment"""
+def plot_event_overlay_BL(file_path):
+    """Plot all detected events overlaid during baseline with average waveform using improved peak alignment"""
 
     # ==============================================================================
     # MODIFY THESE VALUES FOR YOUR ANALYSIS (same as plot_event_detection)
     # ==============================================================================
-    sweep_numbers = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+    sweep_numbers = [1,2,3,4] #check if counting from 0 or 1
 
     #Following loop will dynamically find the VC_Cont dataset
     with h5py.File(file_path, 'r') as f:
@@ -800,7 +800,7 @@ def plot_event_overlay(file_path):
 
     # Analysis window parameters
     analysis_start_time = 0.0
-    analysis_duration = 60
+    analysis_duration = 240 #not sure about this
 
     # Event overlay parameters
     pre_event_time = 0.025  # 25 ms before event peak
@@ -937,7 +937,176 @@ def plot_event_overlay(file_path):
 
         else:
             print("No valid event traces extracted")
-        
+
+def plot_event_overlay_app(file_path):
+    """Plot all detected events overlaid during drug application with average waveform using improved peak alignment"""
+
+    # ==============================================================================
+    # MODIFY THESE VALUES FOR YOUR ANALYSIS (same as plot_event_detection)
+    # ==============================================================================
+    sweep_numbers = [5,6,7,8,9] #to check
+
+    #Following loop will dynamically find the VC_Cont dataset
+    with h5py.File(file_path, 'r') as f:
+        # Search for VC_Continuous dataset in Data group
+        dataset_name = None
+        for key in f['Data'].keys():
+            if re.match(r'R\d+_S\d+_VC_cont', key):
+                dataset_name = f'Data/{key}'
+                break
+
+    #dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
+
+    # Detection parameters - keep same as plot_event_detection
+    threshold_factor = 4.0  # Threshold = threshold_factor * noise_std
+    min_amplitude = 6  # Minimum event amplitude in pA
+    min_rise_time = 0.0001 # Minimum rise time in seconds (0.001 equals 1ms)
+    max_rise_time = 0.01 # Maximum rise time in seconds (0.1 equals 100ms)
+    min_decay_time = 0.001 # Minimum decay time in seconds (1ms)
+    max_amplitude = 2000  # Maximum event amplitude in pA
+    max_decay_time = 0.20
+
+    params.append([f'Maximum Amplitude:{max_amplitude}', f'Maximum Decay Time:{max_decay_time}'])
+
+    # Analysis window parameters
+    analysis_start_time = 0.0
+    analysis_duration = 240 #not sure about this
+
+    # Event overlay parameters
+    pre_event_time = 0.025  # 25 ms before event peak
+    post_event_time = 0.300  # 300 ms after event peak
+
+    # NEW: Peak alignment parameters
+    peak_search_window = 0.0004  # 4 ms window (2 ms before and after detected peak)
+    # ==============================================================================
+
+    with h5py.File(file_path, 'r') as f:
+        data = f[dataset_name][:]
+
+        # Process data same as plot_event_detection
+        available_sweeps = [s for s in sweep_numbers if s <= data.shape[1]]
+        all_time = []
+        all_current = []
+        all_events = []
+
+        num_samples = data.shape[0]
+        sampling_rate = 20000 #10 kHz
+        time_axis = np.arange(num_samples) / sampling_rate
+        sweep_duration_s = time_axis[-1]
+
+        for i, sweep_number in enumerate(available_sweeps):
+            sweep_index = sweep_number - 1
+            current_pA = data[:, sweep_index] * 1e12
+            current_pA = apply_lowpass_filter(current_pA, cutoff_hz=9999) #Different than filter applied earlier (1500)
+
+            time_offset = i * sweep_duration_s
+            time_sweep = time_axis + time_offset
+
+            events, threshold, baseline = detect_events(
+                current_pA, time_axis, threshold_factor, min_amplitude,
+                min_rise_time, max_rise_time, min_decay_time
+            )
+
+            # Filter events with max parameters and adjust timing
+            filtered_events = []
+            for event in events:
+                if (event['amplitude'] <= max_amplitude and
+                        event['decay_tau'] <= max_decay_time):
+                    event['peak_time'] += time_offset
+                    event['onset_time'] += time_offset
+                    filtered_events.append(event)
+
+            all_events.extend(filtered_events)
+            all_time.extend(time_sweep)
+            all_current.extend(current_pA)
+
+        all_time = np.array(all_time)
+        all_current = np.array(all_current)
+
+        # Filter events in analysis window
+        analysis_end_time = analysis_start_time + analysis_duration
+        analysis_events = [event for event in all_events
+                           if analysis_start_time <= event['peak_time'] <= analysis_end_time]
+
+        if not analysis_events:
+            print("No events found in analysis window")
+            return
+
+        # Extract individual event traces with improved peak alignment
+        dt = all_time[1] - all_time[0]
+        pre_samples = int(pre_event_time / dt)
+        post_samples = int(post_event_time / dt)
+        peak_search_samples = int(peak_search_window / (2 * dt))  # samples for ±0.5ms window
+
+        event_traces = []
+        event_time_axis = np.arange(-pre_samples, post_samples) * dt * 1000  # Convert to ms
+
+        plt.figure(figsize=(4, 6))
+
+        for i, event in enumerate(analysis_events):
+            # Find approximate event peak index in concatenated data
+            approx_peak_idx = np.argmin(np.abs(all_time - event['peak_time']))
+
+            # Define search window around the detected peak
+            search_start = max(0, approx_peak_idx - peak_search_samples)
+            search_end = min(len(all_current), approx_peak_idx + peak_search_samples)
+
+            # Cross-correlation alignment (first event becomes template)
+            if i == 0:  # Store first valid event as template
+                template_start = max(0, approx_peak_idx - int(0.005 / dt))  # 5ms before peak
+                template_end = min(len(all_current), approx_peak_idx + int(0.015 / dt))  # 15ms after peak
+                if template_end > template_start:
+                    template = all_current[template_start:template_end] - event['baseline']
+
+            # Cross-correlate current event with template
+            if 'template' in locals() and len(template) > 10:
+                # Extract longer segment for correlation
+                corr_start = max(0, approx_peak_idx - int(0.010 / dt))
+                corr_end = min(len(all_current), approx_peak_idx + int(0.020 / dt))
+                corr_data = all_current[corr_start:corr_end] - event['baseline']
+
+                if len(corr_data) >= len(template):
+                    correlation = np.correlate(corr_data, template, mode='valid')
+                    if len(correlation) > 0:
+                        best_match_idx = np.argmax(correlation)
+                        true_peak_idx = corr_start + best_match_idx + len(template) // 2
+                    else:
+                        true_peak_idx = approx_peak_idx
+                else:
+                    true_peak_idx = approx_peak_idx
+            else:
+                true_peak_idx = approx_peak_idx
+
+            # Extract trace around the refined peak
+            start_idx = max(0, true_peak_idx - pre_samples)
+            end_idx = min(len(all_current), true_peak_idx + post_samples)
+
+            if end_idx - start_idx == len(event_time_axis):
+                event_trace = all_current[start_idx:end_idx] - event['baseline']
+                event_traces.append(event_trace)
+
+                # Plot individual event in gray
+                plt.plot(event_time_axis, event_trace, color='gray', alpha=0.6, linewidth=0.6)
+
+        # Calculate and plot average waveform
+        if event_traces:
+            avg_trace = np.mean(event_traces, axis=0)
+            plt.plot(event_time_axis, avg_trace, color='black', linewidth=1.2, label=f'Average (n={len(event_traces)})')
+
+            #plt.axvline(x=0, color='red', linestyle='--', alpha=0.5, label='Peak')
+            plt.xlabel('Time relative to peak (ms)')
+            plt.ylabel('Current (pA)')
+            plt.title(f'Event Overlay - {len(event_traces)} events (Improved Alignment)')
+            plt.legend()
+            plt.grid(False)
+            plt.tight_layout()
+            plt.show()
+
+            print(f"Plotted {len(event_traces)} events with improved peak alignment")
+            print(f"Used {peak_search_window * 1000:.1f} ms search window for peak refinement")
+
+        else:
+            print("No valid event traces extracted")
 # ==============================================================================
 # MAIN EXECUTION
 # ==============================================================================
@@ -981,7 +1150,8 @@ print("PLOTTING EVENT OVERLAY")
 print(f"{'=' * 60}")
 
 # Plot event overlay
-plot_event_overlay(file_path)
+plot_event_overlay_BL(file_path)
+plot_event_overlay_app(file_path)
 
 #Export metadata
 meta_analysis(export_dir, str(filename), params)
