@@ -30,9 +30,10 @@ rt_fig,ax,rt_results = plot_cumulative_probability(data, 'Rise time (ms)')
 ################
 
 #specify export path
-path = input('Enter file path for figure export:')
-export_path = path.strip("'")
-export_dir = Path(export_path)
+path = input('Enter file path for figure export: ')
+file_path = path.strip().strip('"').strip("'")
+
+export_dir = Path(file_path)
 export_dir.mkdir(parents=True, exist_ok=True)
 
 groupname = input('Enter qualifier for group, i.e. SST for SST neurons, all for all cells, etc.: ')

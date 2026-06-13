@@ -7,12 +7,12 @@ from plot_func import plot_bar_two_datasets
 from plot_func import plot_line
 
 #Set Paths for analysis
-data_paths = ["E:\MBL_neurobiology\bulb_baddies\gc_mus_EPSC\Exports\260606_1_summary.csv",
-              "E:\MBL_neurobiology\bulb_baddies\gc_mus_EPSC\Exports\260609_0_summary.csv",
-              "E:\MBL_neurobiology\bulb_baddies\gc_mus_EPSC\Exports\260611_0_summary.csv",
-              "E:\MBL_neurobiology\bulb_baddies\gc_mus_EPSC\Exports\260611_3_summary.csv",
-              "E:\MBL_neurobiology\bulb_baddies\gc_mus_EPSC\Exports\260612_6_summary.csv",
-              "E:\MBL_neurobiology\bulb_baddies\gc_mus_EPSC\Exports\260613_1_summary.csv"
+data_paths = ["E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260606_1_summary.csv",
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260609_0_summary.csv",
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_0_summary.csv",
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_3_summary.csv",
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260612_6_summary.csv",
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260613_1_summary.csv"
               ] #should be summary file
 
 statistics = pd.DataFrame(columns = ['Test Statistic', 'P-value', 'Test Used'])
@@ -195,10 +195,10 @@ statistics.loc['Rise Time'] = [test_stat, p_val, test]
 # Export Plots #
 ################
 
-#specify export path
-path = input('Enter file path for figure export:')
-export_path = path.strip("'")
-export_dir = Path(export_path)
+path = input('Enter file path for figure export: ')
+file_path = path.strip().strip('"').strip("'")
+
+export_dir = Path(file_path)
 export_dir.mkdir(parents=True, exist_ok=True)
 
 groupname = input('Enter qualifier for group, i.e. SST for SST neurons, all for all cells, etc.: ')
