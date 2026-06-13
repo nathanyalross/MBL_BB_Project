@@ -7,6 +7,7 @@ from pathlib import Path
 from scipy import signal
 from scipy.optimize import curve_fit
 from scipy.integrate import trapezoid  # modern alternative to np.trapz
+from scipy.signal import iirnotch, filtfilt
 import os
 import json
 from datetime import datetime
@@ -136,6 +137,31 @@ def explore_h5(file_path):
         f.visititems(collect_datasets)
 
     return datasets
+
+def apply_line_filter(data, sampling_rate, freq=60.0, quality_factor=30.0):
+    """
+    Apply a notch filter to remove line noise (default 60 Hz).
+
+    Parameters
+    ----------
+    data : array_like
+        Current trace in pA.
+    sampling_rate : float
+        Sampling frequency in Hz.
+    freq : float
+        Frequency to remove in Hz (default 60.0).
+    quality_factor : float
+        Q factor controlling notch width. Higher = narrower notch (default 30.0).
+    
+    Returns
+    -------
+    filtered_data : ndarray
+        Line-noise filtered trace.
+    """
+    b, a = iirnotch(freq, quality_factor, sampling_rate)
+    filtered_data = filtfilt(b, a, data)
+    
+    return filtered_data
 
 def apply_lowpass_filter(data, cutoff_hz=1500, sampling_rate=20000, order=4):
     """Apply low-pass Butterworth filter to data"""
@@ -454,6 +480,11 @@ def plot_VC(file_path):
 
             # Get current data for this sweep
             current_pA = data[:, sweep_index] * 1e12  # Convert to pA
+
+            #Apply Line Filter for 60Hz Noise
+            current_pA = apply_line_filter(current_pA, sampling_rate = 20000)
+            print('WARNING: 60Hz Line Filter Applied')
+            
             current_pA = apply_lowpass_filter(current_pA)  # Apply 5 Hz filter
 
             # Create time axis for this sweep, offset by previous sweeps
@@ -592,6 +623,11 @@ def plot_event_detection(file_path):
         for i, sweep_number in enumerate(available_sweeps):
             sweep_index = sweep_number - 1
             current_pA = data[:, sweep_index] * 1e12  # Convert to pA
+
+            #Apply Line Filter for 60Hz Noise
+            current_pA = apply_line_filter(current_pA, sampling_rate = 20000)
+            print('WARNING: 60Hz Line Filter Applied')
+            
             current_pA = apply_lowpass_filter(current_pA)  # Apply 5 Hz filter
 
             # Create time axis for this sweep, offset by previous sweeps
@@ -827,7 +863,12 @@ def plot_event_overlay_BL(file_path):
         for i, sweep_number in enumerate(available_sweeps):
             sweep_index = sweep_number - 1
             current_pA = data[:, sweep_index] * 1e12
-            current_pA = apply_lowpass_filter(current_pA, cutoff_hz=9999) #Different than filter applied earlier (1500)
+
+            #Apply Line Filter for 60Hz Noise
+            current_pA = apply_line_filter(current_pA, sampling_rate = 20000)
+            print('WARNING: 60Hz Line Filter Applied')
+            
+            current_pA = apply_lowpass_filter(current_pA, cutoff_hz=1500) #Different than filter applied earlier (1500)
 
             time_offset = i * sweep_duration_s
             time_sweep = time_axis + time_offset
