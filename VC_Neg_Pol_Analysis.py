@@ -11,6 +11,9 @@ import os
 import json
 from datetime import datetime
 from typing import List, Dict, Any
+from scipy.signal import find_peaks, butter, filtfilt
+from concurrent.futures import ThreadPoolExecutor
+
 
 #Initiate list of paramaters for analysis
 params = []
