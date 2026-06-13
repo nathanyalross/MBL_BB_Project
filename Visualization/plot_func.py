@@ -20,13 +20,13 @@ def data_analysis(data_1, data_2):
         norm_data_1 = stats.shapiro(data_1)
         norm_data_2 = stats.shapiro(data_2)
 
-        #Depending on outcomes, use either T-test (norm) or Mann-Whitney U test (non-norm)
+        #Depending on outcomes, use either paired T-test (norm) or Wilcoxon signed-rank test (non-norm)
         if (norm_data_1.pvalue < 0.05) or (norm_data_2.pvalue < 0.05): #Select the p-value, a statistic is also returned here
-                u_stat, p_value = stats.mannwhitneyu(data_1,data_2)
-                return (u_stat, p_value, 'Mann-Whitney U')
+                w_stat, p_value = stats.wilcoxon(data_1,data_2)
+                return (w_stat, p_value, 'Wilcoxon signed-rank')
         else:
-                t_stat, p_value = stats.ttest_ind(data_1,data_2)
-                return (t_stat, p_value, 'T-test')
+                t_stat, p_value = stats.ttest_rel(data_1,data_2)
+                return (t_stat, p_value, 'paired T-test')
 
 def plot_line(dataset,
                         color,
@@ -178,6 +178,11 @@ def plot_bar_two_datasets(data_1, bar1_color, data_2, bar2_color, x_tick_labels,
         ax.scatter(x_positions[1] + x_jitter_gfp_neg, data_2,
                 color='#FFFFFF', s=50, alpha=0.6,
                 edgecolors='black', linewidths=0.5, zorder=3)
+        # Add paired connecting lines
+        for i in range(min(len(data_1), len(data_2))):
+            ax.plot([x_positions[0], x_positions[1]],
+                    [data_1[i], data_2[i]],
+                    color='gray', alpha=0.5, linewidth=1, zorder=2)
 
         # Set labels and title
         ax.set_ylabel(y_axis_label, fontsize=axis_label_fontsize, fontweight='bold')
