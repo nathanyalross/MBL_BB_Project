@@ -8,11 +8,12 @@ from plot_func import plot_line
 
 #Set Paths for analysis
 data_paths = ["E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260606_1_summary.csv",
-              #"E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260609_0_summary.csv", #weird noise
-              #"E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_0_summary.csv", #weird noise
-              #"E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_3_summary.csv", #weird noise
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260609_0_summary.csv", #weird noise
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_0_summary.csv", #weird noise
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_3_summary.csv", #weird noise
               "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260612_6_summary.csv",
-              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260613_1_summary.csv"
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260613_1_summary.csv",
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260613_2_summary.csv" #weird noise
               ] #should be summary file
 
 statistics = pd.DataFrame(columns = ['Test Statistic', 'P-value', 'Test Used'])

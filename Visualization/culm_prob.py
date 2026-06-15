@@ -4,8 +4,14 @@ import pandas as pd
 
 
 #Set Paths for analysis
-raw_data = ['E:/MBL_neurobiology/bulb_baddies/Exports/260610_1.csv']
-
+raw_data = data_paths = ["E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260606_1.csv",
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260609_0.csv", #weird noise
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_0.csv", #weird noise
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_3.csv", #weird noise
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260612_6.csv",
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260613_1.csv",
+              "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260613_2.csv" #weird noise
+              ]
 #Load in data
 data = []
 for path in raw_data:
