@@ -216,21 +216,21 @@ for d in data:
     i=i+1
 
 #Plot titles and labels
-decay_title = 'Event Decay Time'
-decay_y_label = 'Decay Time (ms)'
+decay_title = 'Event Decay Tau'
+decay_y_label = 'Decay Tau (ms)'
 
 #Line Colors (color names or hex codes)
 line1_color = "#459B3D"
 line2_color = "#BED2BC" 
 
-decay_time_plot = plot_line(decay_data, line1_color, decay_title, decay_y_label)
+decay_tau_plot = plot_line(decay_data, line1_color, decay_title, decay_y_label)
 
 #Statistical comparisons 
-decay_title = 'Decay Time'
+decay_title = 'Decay Tau'
 decay_x_label = ['BL', 'Muscarine']
 
 decay_bar, test_stat, p_val, test = plot_bar_two_datasets(bl_decay, line1_color,  drug_decay, line2_color, decay_x_label, decay_title, decay_y_label)
-statistics.loc['Decay Time'] = [test_stat, p_val, test]
+statistics.loc['Decay Tau'] = [test_stat, p_val, test]
 
 
 ################
@@ -265,9 +265,9 @@ rise_time_plot.savefig(export_path)
 export_path = export_dir / f"{groupname}_VC_Rise_Time_bar.pdf"
 rise_bar.savefig(export_path)
 
-export_path = export_dir / f"{groupname}_VC_Decay_Time_line.pdf"
-decay_time_plot.savefig(export_path)
-export_path = export_dir / f"{groupname}_VC_Decay_Time_bar.pdf"
+export_path = export_dir / f"{groupname}_VC_Decay_Tau_line.pdf"
+decay_tau_plot.savefig(export_path)
+export_path = export_dir / f"{groupname}_VC_Decay_Tau_bar.pdf"
 decay_bar.savefig(export_path)
 
 export_path = export_dir /f"{groupname}_stats.csv"
