@@ -507,7 +507,7 @@ def plot_VC(file_path):
         all_current = np.array(all_current)
 
         # Plot the concatenated trace
-        ax.plot(all_time, all_current, color='black', linewidth=0.5)
+        ax.plot(all_time, all_current, color='black', linewidth=0.05)
         # Define scale bar sizes
         time_scale_bar = 60  # In seconds
         current_scale_bar = 100  # In pA
@@ -557,8 +557,18 @@ def plot_VC(file_path):
         ax.set_xticks([])
         ax.set_yticks([])
         plt.tight_layout()
-        #plt.ylim(zoom_in)
+        plt.rcParams['pdf.fonttype'] = 42      # embed fonts as vectors (Type 2)
+        plt.rcParams['ps.fonttype'] = 42
+
+        # Save as vector PDF before showing
+        output_path = os.path.join(os.path.dirname(file_path), 'VC_trace.pdf')
+        plt.savefig(output_path, 
+                    format='pdf',
+                    bbox_inches='tight',
+                    backend='pdf')          # forces the vector PDF backend
+
         plt.show()
+        print(f"Saved vector PDF to: {output_path}")
 
         return fig, all_time, all_current
 
