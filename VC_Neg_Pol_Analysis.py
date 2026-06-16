@@ -16,6 +16,8 @@ from typing import List, Dict, Any
 #Initiate list of paramaters for analysis
 params = []
 
+#zoom_in=(1, 600000) #Set zoom in range (in ms) pls check for the scale
+
 def meta_analysis(path: str, input_list, params: List[str]) -> Dict[str, Any]:
     """
     Function to create a meta-analysis json file that includes all input dataframe names and analyses ran
@@ -555,6 +557,7 @@ def plot_VC(file_path):
         ax.set_xticks([])
         ax.set_yticks([])
         plt.tight_layout()
+        #plt.ylim(zoom_in)
         plt.show()
 
         return fig, all_time, all_current
