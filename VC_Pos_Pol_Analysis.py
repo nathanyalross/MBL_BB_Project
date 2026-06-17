@@ -307,7 +307,7 @@ def analyze_event(data, time_axis, peak_idx, baseline_value):
     if decay_end_idx > decay_start_idx + 20:
         try:
             # Work on baseline-subtracted, positive-polarity snippet
-            tempwav = event_baseline - data[decay_start_idx:decay_end_idx]
+            tempwav = data[decay_start_idx:decay_end_idx] - event_baseline #changed for pos polarity
             decay_time = time_axis[decay_start_idx:decay_end_idx] - time_axis[decay_start_idx]
             if time_in_ms:
                 decay_time = decay_time / 1000
@@ -434,7 +434,7 @@ def plot_VC(file_path):
     # ==============================================================================
     # MODIFY THESE VALUES FOR YOUR ANALYSIS
     # ==============================================================================
-    sweep_numbers = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]  # Change this to plot different sweeps 
+    sweep_numbers = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]  # Change this to plot different sweeps
     # ==============================================================================
 
     #Following loop will dynamically find the VC_Cont dataset
@@ -446,7 +446,7 @@ def plot_VC(file_path):
                 dataset_name = f'Data/{key}'
                 break
     
-    #dataset_name = 'Data/R4_S1_VC_cont'  #If you need to manually set the dataset name set it here
+    dataset_name = 'Data/R5_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     with h5py.File(file_path, 'r') as f:
         data = f[dataset_name][:]
@@ -561,14 +561,14 @@ def plot_VC(file_path):
         plt.rcParams['ps.fonttype'] = 42
 
         # Save as vector PDF before showing
-        output_path = os.path.join(os.path.dirname(file_path), 'VC_trace.pdf')
-        plt.savefig(output_path, 
-                    format='pdf',
-                    bbox_inches='tight',
-                    backend='pdf')          # forces the vector PDF backend
+        # output_path = os.path.join(os.path.dirname(file_path), 'VC_trace.pdf')
+        # plt.savefig(output_path,
+        #             format='pdf',
+        #             bbox_inches='tight',
+        #             backend='pdf')          # forces the vector PDF backend
 
         plt.show()
-        print(f"Saved vector PDF to: {output_path}")
+        # print(f"Saved vector PDF to: {output_path}")
 
         return fig, all_time, all_current
 
@@ -579,7 +579,7 @@ def plot_event_detection(file_path):
     # ==============================================================================
     # MODIFY THESE VALUES FOR YOUR ANALYSIS
     # ==============================================================================
-    sweep_numbers = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+    sweep_numbers = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]
 
     # Detection parameters - keep same as plot_event_overlay
     threshold_factor = 4 # Threshold = threshold_factor * noise_std
@@ -604,7 +604,7 @@ def plot_event_detection(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-        #dataset_name = 'Data/R4_S1_VC_cont'   #If you need to set dataset name manually do it here
+        dataset_name = 'Data/R5_S1_VC_cont'   #If you need to set dataset name manually do it here
         
         print(f"Using dataset: {dataset_name}")
         data = f[dataset_name][:]
@@ -847,7 +847,7 @@ def plot_event_overlay_BL(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-    #dataset_name = 'Data/R4_S1_VC_cont'   #If you need to set dataset name manually do it here
+    dataset_name = 'Data/R5_S1_VC_cont'   #If you need to set dataset name manually do it here
 
     # Detection parameters - keep same as plot_event_overlay
     threshold_factor = 4 # Threshold = threshold_factor * noise_std
@@ -1011,7 +1011,7 @@ def plot_event_overlay_app(file_path):
     # ==============================================================================
     # MODIFY THESE VALUES FOR YOUR ANALYSIS (same as plot_event_detection)
     # ==============================================================================
-    sweep_numbers = [5,6,7,8,9] #to check
+    sweep_numbers = [10,11,12,13] #SST optimal effect sweep 10 -13
 
     #Following loop will dynamically find the VC_Cont dataset
     with h5py.File(file_path, 'r') as f:
@@ -1022,7 +1022,7 @@ def plot_event_overlay_app(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-    #Dataset_name = 'Data/R4_S1_VC_cont'   #If you need to set dataset name manually do it here
+    Dataset_name = 'Data/R5_S1_VC_cont'   #If you need to set dataset name manually do it here
 
     # Detection parameters - keep same as plot_event_overlay
     threshold_factor = 4 # Threshold = threshold_factor * noise_std
