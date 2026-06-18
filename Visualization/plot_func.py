@@ -37,7 +37,8 @@ def plot_line(dataset,
                         drug_alpha=0.2,
                         drug_color='gray',
                         figsize=(8, 6),
-                        show_legend=False):
+                        show_legend=False,
+                        normalization = False):
     """
     Plot a single dataset as a line with SEM (standard error of mean) shading.
     
@@ -61,15 +62,18 @@ def plot_line(dataset,
     
     fig, ax = plt.subplots(figsize=figsize)
 
-    #Normalize values to baseline for each cell
-    #Calculate baseline frequency by averaging first 5 sweeps
-    bl_mean = dataset.iloc[0:4,:].mean(axis = 0)
-    #Divide all values by bl mean
-    norm = dataset.div(bl_mean)
+    #Optionally Normalize the data for each cell
+    if normalization is not False:
+        #Calculate baseline frequency by averaging first 5 sweeps
+        bl_mean = dataset.iloc[0:4,:].mean(axis = 0)
+        #Divide all values by bl mean
+        data = dataset.div(bl_mean)
+    else:
+        data = dataset
     
     # Calculate mean and SEM GFP+
-    mean = norm.mean(axis=1)  # Mean across columns (cells)
-    sem = norm.std(axis=1) / np.sqrt(norm.shape[1])
+    mean = data.mean(axis=1)  # Mean across columns (cells)
+    sem = data.std(axis=1) / np.sqrt(data.shape[1])
         
     x = np.arange(1, (len(mean)+1))
         
