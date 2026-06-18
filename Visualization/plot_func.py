@@ -37,7 +37,7 @@ def plot_line(dataset,
                         drug_alpha=0.2,
                         drug_color='gray',
                         figsize=(8, 6),
-                        show_legend=False,
+                        show_legend=True,
                         normalization = False):
     """
     Plot a single dataset as a line with SEM (standard error of mean) shading.
