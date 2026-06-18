@@ -836,7 +836,7 @@ def plot_event_overlay_BL(file_path):
     # ==============================================================================
     # MODIFY THESE VALUES FOR YOUR ANALYSIS (same as plot_event_detection)
     # ==============================================================================
-    sweep_numbers = [1,2,3,4] #check if counting from 0 or 1
+    sweep_numbers = [1,2,3] #check if counting from 0 or 1
 
     #Following loop will dynamically find the VC_Cont dataset
     with h5py.File(file_path, 'r') as f:
@@ -1011,7 +1011,7 @@ def plot_event_overlay_app(file_path):
     # ==============================================================================
     # MODIFY THESE VALUES FOR YOUR ANALYSIS (same as plot_event_detection)
     # ==============================================================================
-    sweep_numbers = [5,6,7,8,9] #to check
+    sweep_numbers = [4,5,6,7,8] #to check
 
     #Following loop will dynamically find the VC_Cont dataset
     with h5py.File(file_path, 'r') as f:
