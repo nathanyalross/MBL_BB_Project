@@ -302,7 +302,7 @@ def analyze_event(data, time_axis, peak_idx, baseline_value):
     # Decay tau
     decay_start_idx = peak_idx
     decay_end_idx = min(len(data), peak_idx + int(0.100 / dt_seconds))
-    decay_tau = 0.020  # default fallback
+    decay_tau = np.nan  # default fallback
 
     if decay_end_idx > decay_start_idx + 20:
         try:
@@ -449,7 +449,7 @@ def plot_VC(file_path):
                 dataset_name = f'Data/{key}'
                 break
     
-    dataset_name = 'Data/R5_S1_VC_cont'  #If you need to manually set the dataset name set it here
+    dataset_name = 'Data/R10_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     with h5py.File(file_path, 'r') as f:
         data = f[dataset_name][:]
@@ -607,7 +607,7 @@ def plot_event_detection(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-        dataset_name = 'Data/R5_S1_VC_cont'   #If you need to set dataset name manually do it here
+        dataset_name = 'Data/R10_S1_VC_cont'   #If you need to set dataset name manually do it here
         
         print(f"Using dataset: {dataset_name}")
         data = f[dataset_name][:]
@@ -850,7 +850,7 @@ def plot_event_overlay_BL(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-    dataset_name = 'Data/R5_S1_VC_cont'   #If you need to set dataset name manually do it here
+    dataset_name = 'Data/R10_S1_VC_cont'   #If you need to set dataset name manually do it here
 
     # Detection parameters - keep same as plot_event_overlay
     threshold_factor = 4 # Threshold = threshold_factor * noise_std
@@ -1014,7 +1014,7 @@ def plot_event_overlay_app(file_path):
     # ==============================================================================
     # MODIFY THESE VALUES FOR YOUR ANALYSIS (same as plot_event_detection)
     # ==============================================================================
-    sweep_numbers = [10,11,12,13] #SST optimal effect sweep 10 -13
+    sweep_numbers = [11,12,13,14] #SST optimal effect sweep 11 -14
 
     #Following loop will dynamically find the VC_Cont dataset
     with h5py.File(file_path, 'r') as f:
@@ -1025,7 +1025,7 @@ def plot_event_overlay_app(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-    Dataset_name = 'Data/R5_S1_VC_cont'   #If you need to set dataset name manually do it here
+    dataset_name = 'Data/R10_S1_VC_cont'   #If you need to set dataset name manually do it here
 
     # Detection parameters - keep same as plot_event_overlay
     threshold_factor = 4 # Threshold = threshold_factor * noise_std
