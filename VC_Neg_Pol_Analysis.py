@@ -450,7 +450,7 @@ def plot_VC(file_path):
                 dataset_name = f'Data/{key}'
                 break
     
-    #dataset_name = 'Data/R3_S1_VC_cont'  #If you need to manually set the dataset name set it here
+    #dataset_name = 'Data/R7_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     with h5py.File(file_path, 'r') as f:
         data = f[dataset_name][:]
@@ -477,8 +477,10 @@ def plot_VC(file_path):
 
         # Calculate time axis for one sweep
         num_samples = data.shape[0]
-        # Based on the data shape (14000 samples), assuming 10 kHz sampling rate
-        time_axis = np.arange(num_samples) * (1 / 20000)  # 10 kHz = 1/10000 s per sample
+        # Based on the data 20 kHz sampling rate
+        #time_axis = np.arange(num_samples) * (1 / 20000)  # 20 kHz = 1/20000 s per sample
+        # Based on the data 50 kHz sampling rate
+        time_axis = np.arange(num_samples) * (1 / 50000)  # 20 kHz = 1/50000 s per sample
         sweep_duration_s = time_axis[-1]  # Duration of one sweep in seconds
 
         for i, sweep_number in enumerate(available_sweeps):
@@ -604,7 +606,7 @@ def plot_event_detection(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-        #dataset_name = 'Data/R4_S1_VC_cont'  #If you need to manually set the dataset name set it here
+        #dataset_name = 'Data/R7_S1_VC_cont'  #If you need to manually set the dataset name set it here
         
         print(f"Using dataset: {dataset_name}")
         data = f[dataset_name][:]
@@ -629,8 +631,8 @@ def plot_event_detection(file_path):
 
         # Calculate time axis for one sweep
         num_samples = data.shape[0]
-        sampling_rate = 20000  # 10 kHz
-        time_axis = np.arange(num_samples) / sampling_rate
+        sampling_rate = 50000 #Change if the sampling rate is changed
+        time_axis = np.arange(num_samples) * (1 / sampling_rate)  # 20 kHz = 1/50000 s per sample
         sweep_duration_s = time_axis[-1]
 
         # Process each sweep
@@ -847,7 +849,7 @@ def plot_event_overlay_BL(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-    #dataset_name = 'Data/R4_S1_VC_cont'  #If you need to manually set the dataset name set it here
+    #dataset_name = 'Data/R7_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     # Detection parameters - keep same as plot_event_detection
     threshold_factor = 4.0  # Threshold = threshold_factor * noise_std
@@ -882,8 +884,10 @@ def plot_event_overlay_BL(file_path):
         all_events = []
 
         num_samples = data.shape[0]
-        sampling_rate = 20000 #10 kHz
-        time_axis = np.arange(num_samples) / sampling_rate
+        # Based on the data 20 kHz sampling rate
+        #time_axis = np.arange(num_samples) * (1 / 20000)  # 20 kHz = 1/20000 s per sample
+        # Based on the data 50 kHz sampling rate
+        time_axis = np.arange(num_samples) * (1 / 50000)  # 20 kHz = 1/50000 s per sample
         sweep_duration_s = time_axis[-1]
 
         for i, sweep_number in enumerate(available_sweeps):
@@ -1022,7 +1026,7 @@ def plot_event_overlay_app(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-    #dataset_name = 'Data/R4_S1_VC_cont'  #If you need to manually set the dataset name set it here
+    #dataset_name = 'Data/R7_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     # Detection parameters - keep same as plot_event_detection
     threshold_factor = 4.0  # Threshold = threshold_factor * noise_std
@@ -1057,8 +1061,10 @@ def plot_event_overlay_app(file_path):
         all_events = []
 
         num_samples = data.shape[0]
-        sampling_rate = 20000 #10 kHz
-        time_axis = np.arange(num_samples) / sampling_rate
+        # Based on the data 20 kHz sampling rate
+        #time_axis = np.arange(num_samples) * (1 / 20000)  # 20 kHz = 1/20000 s per sample
+        # Based on the data 50 kHz sampling rate
+        time_axis = np.arange(num_samples) * (1 / 50000)  # 20 kHz = 1/50000 s per sample
         sweep_duration_s = time_axis[-1]
 
         for i, sweep_number in enumerate(available_sweeps):
