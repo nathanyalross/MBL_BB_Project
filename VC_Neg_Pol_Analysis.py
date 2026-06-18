@@ -345,12 +345,16 @@ def analyze_event(data, time_axis, peak_idx, baseline_value):
                     a, b, c, d = popt
 
                     # Weighted tau: (A1*t1 + A2*t2) / (A1 + A2)
-                    t_val = abs(((a * (1 / b)) + (c * (1 / d))) / (a + c))
+                    tau1 = abs(1 / b)
+                    tau2 = abs(1 / d)
+                    # Amplitude-weighted tau (standard "weighted mean tau")
+                    t_val = (abs(a) * tau1 + abs(c) * tau2) / (abs(a) + abs(c))
 
-                    if 0.001 <= t_val <= 0.300:  # sanity check
-                        decay_tau = np.nan
+                    if 0.0001 <= t_val <= 0.300:  # sanity check
+                        decay_tau = t_val
 
         except Exception:
+            print('Decay Tau calculation failed')
             pass  # fallback stays at 0.020
 
     # Charge calculation
