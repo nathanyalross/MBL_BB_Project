@@ -63,16 +63,16 @@ freq_title = 'Event Frequency'
 freq_y_label = 'Frequency (Hz)'
 
 #Line Colors (color names or hex codes)
-line1_color = "#459B3D"
-line2_color = "#BED2BC" 
+line1_color = "#a12c2a"
+line2_color = "#f0c6c6"
 
 freq_plot = plot_line(freq_data, line1_color, freq_title, freq_y_label)
 
 #Statistical comparisons baseline vs drug
 freq_title = 'Frequency'
-freq_x_label = ['BL', 'Muscarine']
+freq_x_label = ['Baseline', 'Muscarine']
 
-freq_bar, test_stat, p_val, test = plot_bar_two_datasets(bl_freqs, line1_color,  drug_freqs, line2_color, freq_x_label, freq_title, freq_y_label)
+freq_bar, test_stat, p_val, test = plot_bar_two_datasets(bl_freqs, line2_color,  drug_freqs, line1_color, freq_x_label, freq_title, freq_y_label)
 statistics.loc['Frequency'] = [test_stat, p_val, test]
 
 ########################
@@ -143,16 +143,16 @@ amp_title = 'Event Amplitude'
 amp_y_label = 'Amplitude (pA)'
 
 #Line Colors (color names or hex codes)
-line1_color = "#459B3D"
-line2_color = "#BED2BC" 
+line1_color = "#a12c2a"
+line2_color = "#f0c6c6"
 
 amplitude_plot = plot_line(amp_data, line1_color, amp_title, amp_y_label)
 
 #Statistical comparisons baseline vs drug
 amp_title = 'Amplitude'
-amp_x_label = ['BL', 'Muscarine']
+amp_x_label = ['Baseline', 'Muscarine']
 
-amp_bar, test_stat, p_val, test = plot_bar_two_datasets(bl_amp, line1_color, drug_amp, line2_color, amp_x_label, amp_title, amp_y_label)
+amp_bar, test_stat, p_val, test = plot_bar_two_datasets(bl_amp, line2_color, drug_amp, line1_color, amp_x_label, amp_title, amp_y_label)
 statistics.loc['Amplitude'] = [test_stat, p_val, test]
 
 #############################
@@ -183,16 +183,16 @@ rise_title = 'Event Rise Time'
 rise_y_label = 'Rise Time (ms)'
 
 #Line Colors (color names or hex codes)
-line1_color = "#459B3D"
-line2_color = "#BED2BC" 
+line1_color = "#a12c2a"
+line2_color = "#f0c6c6"
 
 rise_time_plot = plot_line(rise_data, line1_color, rise_title, rise_y_label)
 
 #Statistical comparisons 
 rise_title = 'Rise Time'
-rise_x_label = ['BL', 'Muscarine']
+rise_x_label = ['Baseline', 'Muscarine']
 
-rise_bar, test_stat, p_val, test = plot_bar_two_datasets(bl_rise, line1_color,  drug_rise, line2_color, rise_x_label, rise_title, rise_y_label)
+rise_bar, test_stat, p_val, test = plot_bar_two_datasets(bl_rise, line2_color,  drug_rise, line1_color, rise_x_label, rise_title, rise_y_label)
 statistics.loc['Rise Time'] = [test_stat, p_val, test]
 
 #############################
@@ -223,16 +223,16 @@ decay_title = 'Event Decay Tau'
 decay_y_label = 'Decay Tau (ms)'
 
 #Line Colors (color names or hex codes)
-line1_color = "#459B3D"
-line2_color = "#BED2BC" 
+line1_color = "#a12c2a"
+line2_color = "#f0c6c6"
 
 decay_tau_plot = plot_line(decay_data, line1_color, decay_title, decay_y_label)
 
 #Statistical comparisons 
 decay_title = 'Decay Tau'
-decay_x_label = ['BL', 'Muscarine']
+decay_x_label = ['Baseline', 'Muscarine']
 
-decay_bar, test_stat, p_val, test = plot_bar_two_datasets(bl_decay, line1_color,  drug_decay, line2_color, decay_x_label, decay_title, decay_y_label)
+decay_bar, test_stat, p_val, test = plot_bar_two_datasets(bl_decay, line2_color,  drug_decay, line1_color, decay_x_label, decay_title, decay_y_label)
 statistics.loc['Decay Tau'] = [test_stat, p_val, test]
 
 

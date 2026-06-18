@@ -380,8 +380,8 @@ def plot_cumulative_probability(
     d_x, d_med, d_lo, d_hi = bootstrap_cdf(drug_data,     n_bootstrap)
 
     # ── 4. Plot ───────────────────────────────────────────────────────────────
-    BASELINE_COLOR = "#2196F3"
-    DRUG_COLOR     = "#F44336"
+    BASELINE_COLOR = "#f0c6c6"
+    DRUG_COLOR     = "#a12c2a"
 
     if ax is None:
         fig, ax = plt.subplots(figsize=(7, 5))
