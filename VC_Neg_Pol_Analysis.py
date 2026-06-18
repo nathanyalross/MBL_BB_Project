@@ -454,7 +454,7 @@ def plot_VC(file_path):
                 dataset_name = f'Data/{key}'
                 break
     
-    #dataset_name = 'Data/R7_S1_VC_cont'  #If you need to manually set the dataset name set it here
+    dataset_name = 'Data/R7_S1_VC_cont'  #If you need to manually set the dataset name set it here
 
     with h5py.File(file_path, 'r') as f:
         data = f[dataset_name][:]
@@ -495,7 +495,7 @@ def plot_VC(file_path):
             current_pA = data[:, sweep_index] * 1e12  # Convert to pA
 
             #Apply Line Filter for 60Hz Noise
-            current_pA = apply_line_filter(current_pA, sampling_rate = 20000)
+            current_pA = apply_line_filter(current_pA, sampling_rate = 50000)
             print('WARNING: 60Hz Line Filter Applied')
 
             current_pA = apply_lowpass_filter(current_pA, cutoff_hz=1500)  # Apply 5 Hz filter
@@ -610,7 +610,7 @@ def plot_event_detection(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-        #dataset_name = 'Data/R7_S1_VC_cont'  #If you need to manually set the dataset name set it here
+        dataset_name = 'Data/R7_S1_VC_cont'  #If you need to manually set the dataset name set it here
         
         print(f"Using dataset: {dataset_name}")
         data = f[dataset_name][:]
@@ -645,7 +645,7 @@ def plot_event_detection(file_path):
             current_pA = data[:, sweep_index] * 1e12  # Convert to pA
 
             #Apply Line Filter for 60Hz Noise
-            current_pA = apply_line_filter(current_pA, sampling_rate = 20000)
+            current_pA = apply_line_filter(current_pA, sampling_rate = 50000)
             print('WARNING: 60Hz Line Filter Applied')
 
             current_pA = apply_lowpass_filter(current_pA, cutoff_hz=1500)  # Apply 5 Hz filter
@@ -899,7 +899,7 @@ def plot_event_overlay_BL(file_path):
             current_pA = data[:, sweep_index] * 1e12
 
             #Apply Line Filter for 60Hz Noise
-            current_pA = apply_line_filter(current_pA, sampling_rate = 20000)
+            current_pA = apply_line_filter(current_pA, sampling_rate = 50000)
             print('WARNING: 60Hz Line Filter Applied')
 
             current_pA = apply_lowpass_filter(current_pA, cutoff_hz=1500) #Different than filter applied earlier (1500)
