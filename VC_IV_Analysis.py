@@ -59,7 +59,12 @@ def plot_VC(file_path):
             sweep_index = sweep_number - 1
 
             # Create time axis (20 kHz = 50 μs per sample)
-            time_axis = np.arange(12000) * 50e-6  # 50 μs per sample
+            # For 20 KHz data
+            #time_axis = np.arange(12000) * 50e-6  # 50 μs per sample
+
+            #For 50 KHz data
+            time_axis = np.arange(30000) * 20e-6  # 20 μs per sample
+            
             time_ms = time_axis * 1000  # Convert to milliseconds 
             current_pA = data[:, sweep_index] * 1e12  # Convert to pA
 
@@ -235,7 +240,12 @@ def plot_VC2(file_path):
             sweep_index = sweep_number - 1
 
             # Create time axis (20 kHz = 50 μs per sample)
-            time_axis = np.arange(12000) * 50e-6  # 50 μs per sample
+            # For 20 KHz data
+            #time_axis = np.arange(12000) * 50e-6  # 50 μs per sample
+
+            # For 50 KHz data
+            time_axis = np.arange(30000) * 20e-6  # 20 μs per sample
+            
             time_ms = time_axis * 1000  # Convert to milliseconds
             current_pA = data[:, sweep_index] * 1e12  # Convert to pA
 
