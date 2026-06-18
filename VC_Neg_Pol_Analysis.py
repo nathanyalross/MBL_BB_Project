@@ -306,7 +306,7 @@ def analyze_event(data, time_axis, peak_idx, baseline_value):
     # Decay tau
     decay_start_idx = peak_idx
     decay_end_idx = min(len(data), peak_idx + int(0.100 / dt_seconds))
-    decay_tau = 0.020  # default fallback
+    decay_tau = np.nan  # default fallback
 
     if decay_end_idx > decay_start_idx + 20:
         try:
@@ -348,7 +348,7 @@ def analyze_event(data, time_axis, peak_idx, baseline_value):
                     t_val = abs(((a * (1 / b)) + (c * (1 / d))) / (a + c))
 
                     if 0.001 <= t_val <= 0.300:  # sanity check
-                        decay_tau = t_val
+                        decay_tau = np.nan
 
         except Exception:
             pass  # fallback stays at 0.020
@@ -667,17 +667,17 @@ def plot_event_detection(file_path):
             all_current.extend(current_pA)
 
             #Optional Power Spectrum Analysis for noisy recordings
-            #freqs, power = welch(current_pA, fs=20000, nperseg=4096)
-            #mask = freqs <= 2500  # actual Hz cutoff
-            #plt.semilogy(freqs[mask], power[mask])
-            #plt.semilogy(freqs[:500], power[:500])  # plot 0-500 Hz
-            #plt.xlabel('Frequency (Hz)')
-            #plt.ylabel('Power')
-            #plt.axvline(60, color='r', linestyle='--', label='60 Hz')
-            #plt.axvline(120, color='g', linestyle='--', label='120 Hz')
-            #plt.axvline(180, color='b', linestyle='--', label='180 Hz')
-            #plt.legend()
-            #plt.show()
+            # freqs, power = welch(current_pA, fs=20000, nperseg=4096)
+            # mask = freqs <= 2500  # actual Hz cutoff
+            # plt.semilogy(freqs[mask], power[mask])
+            # plt.semilogy(freqs[:500], power[:500])  # plot 0-500 Hz
+            # plt.xlabel('Frequency (Hz)')
+            # plt.ylabel('Power')
+            # plt.axvline(60, color='r', linestyle='--', label='60 Hz')
+            # plt.axvline(120, color='g', linestyle='--', label='120 Hz')
+            # plt.axvline(180, color='b', linestyle='--', label='180 Hz')
+            # plt.legend()
+            # plt.show()
 
         # Convert to numpy arrays
         all_time = np.array(all_time)
@@ -1185,6 +1185,7 @@ def plot_event_overlay_app(file_path):
 
         else:
             print("No valid event traces extracted")
+
 # ==============================================================================
 # MAIN EXECUTION
 # ==============================================================================
