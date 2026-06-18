@@ -9,7 +9,7 @@ data_paths = ["C:/Users/mbl-4/Desktop/DataAnalysis_MBL_Neurobiology_2026_OBTeam/
               #"E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_0_char.csv",
               #"E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260611_3_char.csv",
               #"E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260612_6_char.csv",
-            "C:/Users/mbl-4/Desktop/DataAnalysis_MBL_Neurobiology_2026_OBTeam/2026_MBL_OB_Project/Exports/Exports/260611_3_char.csv"]
+            "C:/Users/mbl-4/Desktop/DataAnalysis_MBL_Neurobiology_2026_OBTeam/2026_MBL_OB_Project/Exports/260611_3_char.csv"]
               #"E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260613_2_char.csv",
               #"E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260606_1_char.csv"] #should be char file
               # "E:/MBL_neurobiology/bulb_baddies/gc_mus_EPSC/Exports/260609_0_char.csv"
