@@ -247,10 +247,10 @@ def detect_events(data, time_axis, threshold_factor, min_amplitude,
             if (event_props['amplitude'] >= min_amplitude and
                     # And rise time is between min and max requirement
                     min_rise_time <= event_props['rise_time'] <= max_rise_time and
-                    #And decay time is greater than the minimum
-                    event_props['decay_tau'] >= min_decay_time) and
-                    #And if the amplitude is less than or equal to the maximum (if max is set)
-                    (max_amplitude is None or event_props['amplitude'] <= max_amplitude):
+                    # And decay time is greater than the minimum
+                    event_props['decay_tau'] >= min_decay_time and
+                    # And if the amplitude is less than or equal to the maximum (if max is set)
+                    (max_amplitude is None or event_props['amplitude'] <= max_amplitude)):
                 events.append(event_props)
 
         except Exception as e:
