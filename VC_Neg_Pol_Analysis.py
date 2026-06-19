@@ -191,7 +191,7 @@ def median_filter_baseline(data, window_size=1000):
     return baseline
 
 def detect_events(data, time_axis, threshold_factor, min_amplitude,
-                  min_rise_time, max_rise_time, min_decay_time):
+                  min_rise_time, max_rise_time, min_decay_time, max_amplitude=None):
     """
     Detect using median-based detection
 
@@ -203,6 +203,7 @@ def detect_events(data, time_axis, threshold_factor, min_amplitude,
     - min_rise_time: minimum rise time in seconds
     - max_rise_time: maximum rise time in seconds
     - min_decay_time: minimum decay time in seconds
+    - max_amplitude: maximum event amplitude in pA
     """
 
     # Calculate baseline and noise
@@ -247,7 +248,9 @@ def detect_events(data, time_axis, threshold_factor, min_amplitude,
                     # And rise time is between min and max requirement
                     min_rise_time <= event_props['rise_time'] <= max_rise_time and
                     #And decay time is greater than the minimum
-                    event_props['decay_tau'] >= min_decay_time):
+                    event_props['decay_tau'] >= min_decay_time) and
+                    #And if the amplitude is less than or equal to the maximum (if max is set)
+                    (max_amplitude is None or event_props['amplitude'] <= max_amplitude):
                 events.append(event_props)
 
         except Exception as e:
@@ -482,7 +485,7 @@ def plot_VC(file_path):
         # Calculate time axis for one sweep
         num_samples = data.shape[0]
         # Based on the data 20 kHz sampling rate
-        #time_axis = np.arange(num_samples) * (1 / 20000)  # 20 kHz = 1/20000 s per sample
+        # time_axis = np.arange(num_samples) * (1 / 20000)  # 20 kHz = 1/20000 s per sample
         # Based on the data 50 kHz sampling rate
         time_axis = np.arange(num_samples) * (1 / 50000)  # 20 kHz = 1/50000 s per sample
         sweep_duration_s = time_axis[-1]  # Duration of one sweep in seconds
@@ -590,6 +593,7 @@ def plot_event_detection(file_path):
     # Detection parameters - keep same as plot_event_overlay
     threshold_factor = 4.0  # Threshold = threshold_factor * noise_std
     min_amplitude = 6  # Minimum event amplitude in pA
+    max_amplitude = 200 #Maximum event amplitude in pA
     min_rise_time = 0.0001 # Minimum rise time in seconds (0.001 equals 1ms)
     max_rise_time = 0.01 # Maximum rise time in seconds (0.1 equals 100ms)
     min_decay_time = 0.0001 # Minimum decay time in seconds (1ms)
@@ -610,7 +614,7 @@ def plot_event_detection(file_path):
                 dataset_name = f'Data/{key}'
                 break
 
-        dataset_name = 'Data/R7_S1_VC_cont'  #If you need to manually set the dataset name set it here
+        #dataset_name = 'Data/R7_S1_VC_cont'  #If you need to manually set the dataset name set it here
         
         print(f"Using dataset: {dataset_name}")
         data = f[dataset_name][:]
@@ -658,7 +662,7 @@ def plot_event_detection(file_path):
             print(f"\nProcessing sweep {sweep_number}...")
             events, threshold, baseline = detect_events(
                 current_pA, time_axis, threshold_factor, min_amplitude,
-                min_rise_time, max_rise_time, min_decay_time
+                min_rise_time, max_rise_time, min_decay_time, max_amplitude
             )
 
             # Adjust event times for concatenated display
@@ -1068,7 +1072,7 @@ def plot_event_overlay_app(file_path):
         # Based on the data 20 kHz sampling rate
         #time_axis = np.arange(num_samples) * (1 / 20000)  # 20 kHz = 1/20000 s per sample
         # Based on the data 50 kHz sampling rate
-        time_axis = np.arange(num_samples) * (1 / 50000)  # 20 kHz = 1/50000 s per sample
+        time_axis = np.arange(num_samples) * (1 / 50000)  # 50 kHz = 1/50000 s per sample
         sweep_duration_s = time_axis[-1]
 
         for i, sweep_number in enumerate(available_sweeps):
@@ -1076,7 +1080,7 @@ def plot_event_overlay_app(file_path):
             current_pA = data[:, sweep_index] * 1e12
 
             #Apply Line Filter for 60Hz Noise
-            current_pA = apply_line_filter(current_pA, sampling_rate = 20000)
+            current_pA = apply_line_filter(current_pA, sampling_rate = 50000)
             print('WARNING: 60Hz Line Filter Applied')
 
             current_pA = apply_lowpass_filter(current_pA, cutoff_hz=1500) #Different than filter applied earlier (1500)
